@@ -1,0 +1,6 @@
+{
+  "summary": "Plano arquitetural detalhado para auditoria, correção e aprimoramento do Runtime OS do 3eatcru OS: reforço do isolamento de sandbox dos aplicativos (OsContext soberano), execução contínua com monitoramento ativo de CPU para apps em background, sincronização entre WindowManager, ProcessManager e TaskManager, e suíte completa de testes automatizados de integridade no Vitest.",
+  "updatedAt": "2026-10-20T02:17:41.441304311Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

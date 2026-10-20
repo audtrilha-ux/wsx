@@ -1,0 +1,251 @@
+<div class="h-full flex flex-col bg-slate-50 font-sans relative overflow-hidden">
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between shrink-0 shadow-xs z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-xs">
+        <mat-icon class="text-[20px]">point_of_sale</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-sm font-bold text-slate-900 leading-tight">Ponto de Venda (PDV)</h2>
+        <p class="text-[11px] text-slate-500 font-medium">
+          Terminal Operacional · {{ app.companyName }}
+          @if (app.branchName) {
+            · <span class="text-indigo-600 font-semibold">{{ app.branchName }}</span>
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Incoming Remote Orders Counter Badge -->
+      @if (incomingOrders().length > 0) {
+        <div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 animate-pulse">
+          <mat-icon class="text-amber-600 text-[16px]">notifications_active</mat-icon>
+          <span>{{ incomingOrders().length }} Pedido(s) Online</span>
+        </div>
+      }
+
+      <!-- Sales History Drawer Trigger -->
+      <button 
+        (click)="openSalesHistory()" 
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:border-indigo-400 hover:text-indigo-600 transition-all cursor-pointer shadow-xs">
+        <mat-icon class="text-slate-500 text-[18px]">history</mat-icon>
+        <span>Vendas Recentes</span>
+      </button>
+
+      <!-- Conexão do Terminal -->
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+        [class]="app.isOnline ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'">
+        <span class="w-2 h-2 rounded-full" [class]="app.isOnline ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+        {{ app.isOnline ? 'Terminal Online' : 'Modo Offline (Local)' }}
+      </div>
+
+      <div class="h-4 w-px bg-slate-200"></div>
+
+      <div class="text-xs font-medium text-slate-500 flex items-center gap-1">
+        <mat-icon class="text-slate-400 text-[16px]">lock_open</mat-icon>
+        Caixa Aberto
+      </div>
+    </div>
+  </header>
+
+  <!-- Remote Order Incoming Alert Banner -->
+  @if (incomingOrders().length > 0) {
+    <div class="bg-indigo-900 text-white px-6 py-2.5 text-xs flex items-center justify-between animate-fade-in shadow-md z-10 shrink-0">
+      <div class="flex items-center gap-2 font-bold">
+        <mat-icon class="text-amber-400 text-base animate-bounce">shopping_bag</mat-icon>
+        <span>Novo Pedido Online Recebido: <strong>{{ incomingOrders()[0].customerName }}</strong> (R$ {{ incomingOrders()[0].total | number:'1.2-2' }})</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button (click)="acceptIncomingOrder(incomingOrders()[0])" class="px-3 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-lg cursor-pointer transition-colors">
+          Carregar no Carrinho
+        </button>
+        <button (click)="dismissIncomingOrder(incomingOrders()[0].orderId)" class="text-indigo-200 hover:text-white px-2 py-1 cursor-pointer">
+          Dispensar
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Alert Status -->
+  @if (saleSuccessMessage()) {
+    <div class="bg-emerald-50 border-b border-emerald-200 px-6 py-2.5 text-xs text-emerald-800 flex items-center justify-between animate-fade-in shrink-0 z-10">
+      <span class="flex items-center gap-1.5 font-semibold">
+        <mat-icon class="text-sm text-emerald-600">check_circle</mat-icon>
+        {{ saleSuccessMessage() }}
+      </span>
+      <button (click)="saleSuccessMessage.set('')" class="text-emerald-600 hover:text-emerald-800 font-bold cursor-pointer">FECHAR</button>
+    </div>
+  }
+  @if (saleErrorMessage()) {
+    <div class="bg-rose-50 border-b border-rose-200 px-6 py-2.5 text-xs text-rose-800 flex items-center justify-between animate-fade-in shrink-0 z-10">
+      <span class="flex items-center gap-1.5 font-semibold">
+        <mat-icon class="text-sm text-rose-600">error</mat-icon>
+        {{ saleErrorMessage() }}
+      </span>
+      <button (click)="saleErrorMessage.set('')" class="text-rose-600 hover:text-rose-800 font-bold cursor-pointer">FECHAR</button>
+    </div>
+  }
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex overflow-hidden relative">
+    <!-- Products Grid Subcomponent -->
+    <main class="flex-1 overflow-hidden relative">
+      <app-pos-product-grid
+        [products]="products()"
+        (productSelected)="addToCart($event)">
+      </app-pos-product-grid>
+
+      <!-- Floating Barcode Scanner Simulator Card inside catalog workspace -->
+      <div class="absolute bottom-4 left-4 z-20 bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-lg max-w-xs animate-fade-in flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+            <mat-icon class="text-indigo-600 text-[18px]">barcode_reader</mat-icon>
+            <span>Scanner de Mão (Virtual)</span>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </div>
+        
+        <div class="flex gap-1.5">
+          <select
+            id="pos-simulator-barcode"
+            #simBarcode
+            class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none font-sans cursor-pointer">
+            @for (prod of products(); track prod.id) {
+              @if (prod.barcode) {
+                <option [value]="prod.barcode">
+                  {{ prod.name }} ({{ prod.barcode }})
+                </option>
+              }
+            }
+          </select>
+          <button 
+            (click)="scanBarcode(simBarcode.value)"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer transition-all active:scale-95 shadow-sm whitespace-nowrap">
+            Bipar
+          </button>
+        </div>
+        <div class="text-[9px] text-slate-400 font-medium leading-normal">
+          Ou use o leitor físico: leitura automática em qualquer tela (basta focar fora de campos de texto).
+        </div>
+      </div>
+    </main>
+
+    <!-- Cart Sidebar Subcomponent -->
+    <app-pos-cart
+      [cart]="cart()"
+      [total]="cartTotal()"
+      [customers]="customers()"
+      [selectedCustomerId]="selectedCustomerId()"
+      [isProcessing]="isProcessing()"
+      (customerIdChange)="selectedCustomerId.set($event)"
+      (paymentMethodChange)="selectedPaymentMethod.set($event)"
+      (quantityChange)="handleQuantityChange($event)"
+      (openDrawer)="handleOpenDrawer()"
+      (readScale)="handleReadScale()"
+      (checkout)="finishSale($event)">
+    </app-pos-cart>
+  </div>
+
+  <!-- Sales History slide-over Drawer -->
+  @if (showSalesHistory()) {
+    <div class="fixed inset-0 bg-slate-900/40 z-50 backdrop-blur-xs flex justify-end animate-fade-in">
+      <!-- Accessible backdrop dismissal button -->
+      <button 
+        type="button"
+        class="absolute inset-0 w-full h-full cursor-default bg-transparent border-0 outline-none" 
+        (click)="showSalesHistory.set(false)"
+        aria-label="Fechar histórico de vendas">
+      </button>
+      
+      <!-- Content Drawer -->
+      <div class="w-full max-w-md bg-white h-full shadow-2xl flex flex-col relative z-10">
+        <!-- Drawer Header -->
+        <div class="p-5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <mat-icon class="text-indigo-600 text-[22px]">history</mat-icon>
+            <h3 class="font-bold text-sm text-slate-800 uppercase tracking-wider">Vendas Recentes</h3>
+          </div>
+          <button (click)="showSalesHistory.set(false)" class="w-8 h-8 rounded-full hover:bg-slate-200/80 flex items-center justify-center cursor-pointer text-slate-500">
+            <mat-icon class="text-[20px]">close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Drawer Body (Sales List) -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-4">
+          @if (salesHistory().length === 0) {
+            <div class="h-64 flex flex-col items-center justify-center text-slate-400 text-xs">
+              <mat-icon class="text-4xl text-slate-300 mb-2">receipt_long</mat-icon>
+              Nenhuma venda realizada neste terminal
+            </div>
+          } @else {
+            @for (sale of salesHistory(); track sale.id) {
+              <div class="p-4 rounded-xl border flex flex-col gap-3 transition-colors"
+                [class]="sale.status === 'CANCELLED' ? 'border-rose-100 bg-rose-50/20' : 'border-slate-200 bg-white hover:border-indigo-200'">
+                
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="text-[10px] text-slate-400 font-mono font-bold">ID: {{ sale.id.substring(5, 17).toUpperCase() }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5">{{ sale.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+                  </div>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase"
+                    [class]="sale.status === 'CANCELLED' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
+                    {{ sale.status === 'CANCELLED' ? 'ESTORNADA' : 'CONCLUÍDA' }}
+                  </span>
+                </div>
+
+                <!-- Items Summary -->
+                <div class="bg-slate-50/50 rounded-lg p-2.5 text-xs text-slate-700 space-y-1">
+                  @for (item of sale.items; track item.productId) {
+                    <div class="flex justify-between">
+                      <span class="truncate pr-4 max-w-[200px] font-medium">{{ item.name }}</span>
+                      <span class="shrink-0 text-slate-500 font-mono">{{ item.quantity }}x {{ item.price | currency:'BRL' }}</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Totals and Action -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                  <div>
+                    @if (sale.discount && sale.discount > 0) {
+                      <div class="text-[10px] text-emerald-600 font-medium">Desconto: -{{ sale.discount | currency:'BRL' }}</div>
+                    }
+                    <div class="text-xs font-bold text-slate-800">
+                      Total: <span class="text-sm font-black text-slate-900">{{ sale.total | currency:'BRL' }}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-medium">Forma: {{ sale.paymentMethod }}</div>
+                  </div>
+
+                  @if (sale.status === 'COMPLETED') {
+                    <!-- Estornar button with double-tap safety to prevent accidental clicks -->
+                    @if (confirmCancelId() === sale.id) {
+                      <div class="flex items-center gap-1.5">
+                        <button
+                          (click)="executeCancelSale(sale.id)"
+                          class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] transition-colors cursor-pointer shadow-xs whitespace-nowrap">
+                          Confirmar
+                        </button>
+                        <button
+                          (click)="confirmCancelId.set('')"
+                          class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[10px] transition-colors cursor-pointer">
+                          Voltar
+                        </button>
+                      </div>
+                    } @else {
+                      <button
+                        (click)="confirmCancelId.set(sale.id)"
+                        class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 font-bold text-[10px] border border-slate-200 hover:border-rose-200 transition-colors cursor-pointer flex items-center gap-1">
+                        <mat-icon class="text-[14px]">undo</mat-icon>
+                        Estornar Venda
+                      </button>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

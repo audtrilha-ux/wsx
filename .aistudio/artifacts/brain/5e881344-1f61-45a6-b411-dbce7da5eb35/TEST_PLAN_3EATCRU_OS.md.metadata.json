@@ -1,0 +1,5 @@
+{
+  "summary": "Plano de Teste Completo e Relatório de Validação Integrada do 3eatcru Business OS. Cobre os testes de ponta a ponta nas três personas: Cliente (Marketplace Londrina, Vitrine, Pedidos, 3eatcru ID), Usuário do OS (Terminal PDV, Varejo, Restaurante, Mesas, KDS, Estoque, Finanças, Tema DEsk, Offline-First) e HQ (Centro de Controle Administrativo da Plataforma, Billing, Telemetria, Auditoria).",
+  "updatedAt": "2026-10-19T10:23:42.107474361Z",
+  "userFacing": true
+}

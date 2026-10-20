@@ -1,0 +1,285 @@
+<div [ngClass]="activeWallpaper()" class="h-screen w-full bg-slate-900 bg-cover bg-center overflow-hidden flex flex-col font-sans text-slate-800 relative select-none transition-all duration-500">
+  
+  <!-- Skeuomorphic Physical Desk Lamp Warm Lighting Effect (fyzugx/DEsk inspired) -->
+  @if (themeService.deskLampEnabled()) {
+    <div class="absolute inset-0 pointer-events-none z-[1] bg-[radial-gradient(ellipse_75%_55%_at_80%_15%,rgba(245,158,11,0.24),transparent_75%)] mix-blend-screen transition-opacity duration-700 desk-lamp-raytrace"></div>
+    <div class="absolute inset-0 pointer-events-none z-[1] bg-[radial-gradient(circle_at_80%_15%,rgba(254,243,199,0.18),transparent_42%)] transition-opacity duration-700"></div>
+  }
+  
+  @if (themeService.isDeskTheme()) {
+    <!-- Physical Brass Desk Lamp Hood & Interactive Pull-Chain Fixture -->
+    <button 
+      type="button"
+      (click)="themeService.toggleDeskLamp()"
+      [title]="themeService.deskLampEnabled() ? 'Puxar cordinha de latão: Apagar luminária' : 'Puxar cordinha de latão: Acender luminária'"
+      aria-label="Alternar iluminação da luminária de mesa"
+      class="absolute top-0 right-16 z-[20] hidden md:flex flex-col items-center group cursor-pointer select-none bg-transparent border-none p-0 outline-none">
+      <div class="w-20 h-10 rounded-b-2xl desk-brass-plate flex items-center justify-center shadow-2xl border border-amber-300/40 group-hover:scale-105 transition-transform">
+        <div class="w-8 h-2 rounded-full transition-all duration-300"
+             [class]="themeService.deskLampEnabled() ? 'bg-amber-200/90 shadow-[0_0_16px_#fde68a] animate-pulse' : 'bg-amber-950/70 border border-amber-800/40'"></div>
+      </div>
+      <div class="w-1.5 h-6 bg-gradient-to-b from-amber-800 to-amber-950"></div>
+      <!-- Tactile Brass Beaded Pull-Cord -->
+      <div class="w-0.5 h-9 bg-gradient-to-b from-amber-500 via-amber-300 to-amber-600 group-hover:h-11 transition-all duration-200 flex flex-col justify-end items-center">
+        <div class="w-2.5 h-3.5 rounded-full desk-brass-plate border border-amber-300 shadow-md group-hover:scale-115"></div>
+      </div>
+    </button>
+  }
+
+  <!-- Top Support Mode Indicator Banner -->
+  @if (identityService.isSupportImpersonating()) {
+    <div class="w-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-slate-950 font-sans font-bold py-1.5 px-4 z-[99999] flex items-center justify-between shadow-md text-xs select-none">
+      <div class="flex items-center gap-2">
+        <mat-icon class="text-sm">shield</mat-icon>
+        <span class="uppercase tracking-wider font-mono text-[11px]">MODO SUPORTE HQ CENTRAL</span>
+        <span class="opacity-75">• Impersonando a empresa: <strong>{{ identityService.impersonatedCompany()?.name || osState.company().name }}</strong> (ID: {{ osState.company().id }})</span>
+      </div>
+      <button 
+        (click)="identityService.exitSupportImpersonation()" 
+        class="bg-slate-950/80 hover:bg-slate-950 text-amber-300 font-mono text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 transition-all">
+        <mat-icon class="text-xs">logout</mat-icon>
+        Sair do Modo Suporte (Voltar ao HQ)
+      </button>
+    </div>
+  }
+
+  <!-- Local Terminal Operator PIN Lock -->
+  @if (operatorLockService.isLocked()) {
+    <app-operator-lock></app-operator-lock>
+  }
+
+  <!-- Suspended/Locked Terminal Overlay -->
+  @if (osState.company().status === 'suspended') {
+    <div class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[999999] flex items-center justify-center p-6 text-center select-none">
+      <div class="max-w-md space-y-6">
+        <div class="w-20 h-20 bg-rose-600/10 border border-rose-500/20 text-rose-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-rose-950/50 animate-pulse">
+          <mat-icon class="text-5xl h-[48px] w-[48px] leading-none">lock</mat-icon>
+        </div>
+        <div class="space-y-2">
+          <h2 class="text-2xl font-black tracking-tight text-white uppercase">Terminal Bloqueado</h2>
+          <p class="text-sm text-slate-400">
+            Este terminal/workspace (<span class="font-mono text-xs text-rose-400 bg-rose-950/40 px-1.5 py-0.5 rounded">{{ osState.company().id }}</span>) foi suspenso ou bloqueado pela administração do **Central HQ**.
+          </p>
+        </div>
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Motivo Provável</span>
+          <p class="text-xs text-slate-300 leading-relaxed">Falta de saldo na conta do tenant, termos de serviço ou licença expirada.</p>
+        </div>
+        <p class="text-[11px] text-slate-500">
+          Por favor, entre em contato com o suporte em <span class="font-bold text-slate-400">suporte@3eatcru.com</span> para reativar seu terminal.
+        </p>
+        <div class="pt-2">
+          <a href="/hq" class="text-xs text-indigo-400 font-bold hover:underline inline-flex items-center gap-1">
+            <mat-icon class="text-sm">terminal</mat-icon> Acessar Central HQ Administrador
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+  
+  <!-- Floating Toast Notifications Center (DEsk Post Box / Linux Toast) -->
+  <div class="absolute bottom-20 right-4 z-[9999] flex flex-col gap-2 w-80 pointer-events-none">
+    @if (themeService.isDeskTheme() && notifications().length > 0) {
+      <div class="w-full py-1 px-3 rounded-lg desk-brass-plate text-[9px] font-bold uppercase tracking-widest text-amber-950 flex items-center justify-between shadow-md">
+        <span class="flex items-center gap-1.5">
+          <mat-icon class="text-xs">markunread_mailbox</mat-icon>
+          Caixa de Correspondência
+        </span>
+        <span class="font-mono text-[8px]">{{ notifications().length }} aviso(s)</span>
+      </div>
+    }
+    @for (notif of notifications(); track notif.id) {
+      <div class="w-full backdrop-blur-md border rounded-xl p-3.5 shadow-xl flex gap-3 items-start pointer-events-auto transition-all duration-300 transform translate-y-0"
+           [ngClass]="themeService.isDeskTheme() 
+             ? 'bg-[#1c130d]/95 border-amber-600/40 text-amber-100 shadow-[0_10px_25px_rgba(0,0,0,0.8)]'
+             : (notif.type === 'success' 
+                 ? 'bg-slate-950/90 border-emerald-500/30 text-emerald-100' 
+                 : notif.type === 'warning' 
+                   ? 'bg-slate-950/90 border-amber-500/30 text-amber-100' 
+                   : 'bg-slate-950/90 border-indigo-500/30 text-indigo-100')">
+        <div class="p-1 rounded-lg"
+             [ngClass]="themeService.isDeskTheme()
+               ? 'desk-brass-plate text-amber-950'
+               : (notif.type === 'success' 
+                   ? 'bg-emerald-500/10 text-emerald-400' 
+                   : notif.type === 'warning' 
+                     ? 'bg-amber-500/10 text-amber-400' 
+                     : 'bg-indigo-500/10 text-indigo-400')">
+          <mat-icon class="text-lg">
+            {{ notif.type === 'success' ? 'check_circle' : notif.type === 'warning' ? 'warning' : 'info' }}
+          </mat-icon>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h4 class="text-xs font-bold" [class.text-amber-200]="themeService.isDeskTheme()">{{ notif.title }}</h4>
+          <p class="text-[10px] mt-0.5 leading-normal" [class.text-amber-200/80]="themeService.isDeskTheme()" [class.text-slate-300]="!themeService.isDeskTheme()">
+            {{ notif.message }}
+          </p>
+        </div>
+        <button (click)="removeNotification(notif.id)" class="text-slate-400 hover:text-white shrink-0">
+          <mat-icon class="text-[16px]">close</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Backdrop overlays to close menus on click-outside -->
+  @if (isStartMenuOpen()) {
+    <button (click)="isStartMenuOpen.set(false); isWorkspaceMenuOpen.set(false)" class="fixed inset-0 z-40 bg-transparent border-none cursor-default w-full h-full" aria-label="Fechar Menu Iniciar" type="button"></button>
+  }
+  @if (isTrayOpen()) {
+    <button (click)="isTrayOpen.set(false)" class="fixed inset-0 z-40 bg-transparent border-none cursor-default w-full h-full" aria-label="Fechar Painel Rápido" type="button"></button>
+  }
+  @if (isCalendarOpen()) {
+    <button (click)="isCalendarOpen.set(false)" class="fixed inset-0 z-40 bg-transparent border-none cursor-default w-full h-full" aria-label="Fechar Calendário e Notificações" type="button"></button>
+  }
+  @if (isContextMenuOpen()) {
+    <button (click)="isContextMenuOpen.set(false)" class="fixed inset-0 z-40 bg-transparent border-none cursor-default w-full h-full" aria-label="Fechar Menu de Contexto" type="button"></button>
+  }
+
+  <!-- Desktop Area / Grid of Shortcuts -->
+  <app-os-desktop-shortcuts
+    [desktopIconSize]="desktopIconSize()"
+    [installedAppShortcuts]="installedAppShortcuts()"
+    [isPrinterOnline]="printerService.isPrinterOnline()"
+    [outboxLength]="syncService.outbox().length"
+    [companyId]="osState.company().id"
+    [isOnline]="syncService.isOnline()"
+    [networkOnline]="syncService.networkOnline()"
+    [serverReachable]="syncService.serverReachable()"
+    [syncStatus]="syncService.syncStatus()"
+    [lastSyncedAt]="syncService.lastSyncedAt()"
+    [deadLetterCount]="syncService.deadLetterCount()"
+    [syncHealthy]="syncService.syncHealthy()"
+    [outboxOps]="syncService.outbox()"
+    (openFileExplorer)="openFileExplorer()"
+    (openBrowser)="openBrowser()"
+    (openInstalledApps)="openInstalledApps()"
+    (openSettings)="openSettings()"
+    (openTaskManager)="openTaskManager()"
+    (openCart)="openCartWindow()"
+    (openStore)="openMarketplaceWindow()"
+    (openApp)="openDynamicApp($event)"
+    (contextMenu)="onDesktopContextMenu($event)"
+    (triggerDiagnostics)="triggerDiagnostics()"
+    (triggerManualSync)="triggerManualSync()"
+    (toggleNetwork)="toggleNetwork()"
+    (togglePrinterPaper)="togglePrinterPaper()"
+    (reprintLastReceipt)="reprintLastReceipt()" />
+
+  <!-- Window Compositor Engine -->
+  <app-os-window-compositor
+    [windows]="windowManager.windows()"
+    [topWindowId]="windowManager.topWindowId()"
+    [activeDraggingId]="activeDraggingId()"
+    [activeResizingId]="activeResizingId()"
+    [snapPreviewZone]="snapPreviewZone()"
+    (focusWindow)="windowManager.focusWindow($event)"
+    (toggleMaximize)="windowManager.toggleMaximize($event)"
+    (minimizeWindow)="windowManager.minimizeWindow($event)"
+    (closeWindow)="windowManager.closeWindow($event)"
+    (triggerSnap)="triggerSnap($event.id, $event.zone)"
+    (startDrag)="startDrag($event.event, $event.window)"
+    (startResize)="startResize($event.event, $event.window)" />
+
+  <!-- Start Menu -->
+  <app-os-start-menu
+    [isOpen]="isStartMenuOpen()"
+    [companyName]="osState.company().name"
+    [activeOperator]="activeOperator()"
+    [installedApps]="startMenuInstalledApps()"
+    (closeMenu)="isStartMenuOpen.set(false)"
+    (openInstalledApps)="openInstalledApps()"
+    (openSettings)="openSettings()"
+    (openBrowser)="openBrowser()"
+    (openTaskManager)="openTaskManager()"
+    (openCalculator)="openCalculator()"
+    (openFileExplorer)="openFileExplorer()"
+    (openApp)="openAppFromStartMenu($event)"
+    (launchApp)="launchAppFromStartMenu($event)"
+    (lockSystem)="lockSystem()"
+    (refreshDesktop)="refreshDesktop()"
+    (logoutSession)="logoutSession()"
+    (searchWeb)="onStartMenuSearchWeb($event)" />
+
+  <!-- Quick Settings Panel -->
+  <app-os-quick-settings
+    [isOpen]="isTrayOpen()"
+    [isOnline]="syncService.isOnline()"
+    [hasPaper]="printerService.hasPaper()"
+    [autoFitActive]="autoFitActive()"
+    [desktopIconSize]="desktopIconSize()"
+    [wallpapers]="wallpapers"
+    [activeWallpaper]="activeWallpaper()"
+    [activeProfile]="activeProfile()"
+    (closePanel)="isTrayOpen.set(false)"
+    (toggleNetwork)="toggleNetwork()"
+    (togglePrinterPaper)="togglePrinterPaper()"
+    (triggerDiagnostics)="triggerDiagnostics()"
+    (reprintLastReceipt)="reprintLastReceipt()"
+    (triggerManualSync)="triggerManualSync()"
+    (toggleAutoFit)="toggleAutoFit()"
+    (setDesktopIconSize)="setDesktopIconSize($event)"
+    (openDisplaySettings)="openSettings()"
+    (autoFitWindows)="autoFitWindows()"
+    (openCashDrawer)="triggerCashDrawer()"
+    (setWallpaper)="setWallpaper($event)"
+    (selectProfile)="switchProfile($event)" />
+
+  <!-- Dynamic Calendar Flyout & Notification Center (Alt + N) -->
+  <app-os-calendar-flyout
+    [isOpen]="isCalendarOpen()"
+    [notificationHistory]="notificationHistory()"
+    (closeFlyout)="isCalendarOpen.set(false)"
+    (dismissNotification)="dismissHistoricalNotification($event)"
+    (clearAllNotifications)="clearAllNotifications()" />
+
+  <!-- Taskbar -->
+  <app-os-taskbar
+    [windows]="windowManager.windows()"
+    [topWindowId]="windowManager.topWindowId()"
+    [isStartMenuOpen]="isStartMenuOpen()"
+    [isTrayOpen]="isTrayOpen()"
+    [isCalendarOpen]="isCalendarOpen()"
+    [isShortcutHudOpen]="isShortcutHudOpen()"
+    [isDesktopShown]="isDesktopShown()"
+    [companyName]="osState.company().name"
+    [branchName]="identityService.currentTenant()?.branchName"
+    [isOnline]="syncService.isOnline()"
+    [hasPaper]="printerService.hasPaper()"
+    [notificationCount]="notificationHistory().length"
+    [currentTime]="currentTime()"
+    [currentDate]="currentDate()"
+    [activeProfile]="activeProfile()"
+    (toggleStartMenu)="isStartMenuOpen.set(!isStartMenuOpen()); isTrayOpen.set(false)"
+    (toggleTray)="isTrayOpen.set(!isTrayOpen()); isStartMenuOpen.set(false); isCalendarOpen.set(false)"
+    (toggleCalendar)="toggleCalendar()"
+    (toggleShortcutHud)="toggleShortcutHud()"
+    (toggleShowDesktop)="toggleShowDesktop()"
+    (toggleWindow)="windowManager.toggleWindow($event); isStartMenuOpen.set(false); isTrayOpen.set(false)"
+    (closeWindow)="windowManager.closeWindow($event)"
+    (toggleProfile)="toggleOperationalProfile()" />
+
+  <!-- Desktop Right-Click Context Menu -->
+  <app-os-desktop-context-menu
+    [isOpen]="isContextMenuOpen()"
+    [x]="contextMenuX()"
+    [y]="contextMenuY()"
+    [desktopIconSize]="desktopIconSize()"
+    (closeMenu)="closeContextMenu()"
+    (setIconSize)="setDesktopIconSize($event)"
+    (tileWindows)="windowManager.tileWindows()"
+    (cascadeWindows)="windowManager.cascadeWindows()"
+    (autoFit)="autoFitWindows()"
+    (toggleDesktop)="toggleShowDesktop()"
+    (openFileExplorer)="openFileExplorer()"
+    (openTaskManager)="openTaskManager()"
+    (openDiagnostics)="openHealthDiagnostics()"
+    (openBrowser)="openBrowser()"
+    (openSettings)="openSettings()"
+    (refreshDesktop)="refreshDesktop()" />
+
+  <!-- Keyboard Shortcuts Helper HUD Modal (Alt + /) -->
+  <app-os-shortcuts-hud
+    [isOpen]="isShortcutHudOpen()"
+    (closeModal)="isShortcutHudOpen.set(false)" />
+</div>

@@ -1,0 +1,10 @@
+{
+  "name": "Remix Remix Remix Enterprise 3eatcru OS",
+  "description": "Enterprise ecossistema para empresas com OS systema operacional, e loja de app, como uma rede social mais para empresas, restaurantes , varejo e serviços ",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

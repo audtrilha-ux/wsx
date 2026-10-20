@@ -1,0 +1,123 @@
+<!-- Outer Container (DEsk Physical Counter) -->
+<div class="min-h-screen desk-wood-bg flex flex-col font-sans text-stone-900 relative overflow-hidden select-none">
+
+  <!-- Banker's Lamp Warm Raytraced Glow -->
+  <div class="absolute inset-0 pointer-events-none z-[1] bg-[radial-gradient(ellipse_75%_55%_at_75%_12%,rgba(245,158,11,0.22),transparent_75%)] mix-blend-screen desk-lamp-raytrace"></div>
+
+  <!-- 1. LOADING STATE -->
+  @if (loading()) {
+    <div class="flex-1 flex flex-col items-center justify-center p-8 min-h-[400px] relative z-10">
+      <div class="desk-paper-sheet p-8 text-center max-w-sm">
+        <div class="w-10 h-10 border-4 border-amber-600/30 border-t-amber-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-xs text-stone-700 font-mono tracking-wide">Abrindo Vitrine & Cardápio da Empresa...</p>
+      </div>
+    </div>
+  }
+
+  <!-- 2. ERROR STATE -->
+  @if (!loading() && error()) {
+    <div class="flex-1 flex items-center justify-center p-6 relative z-10">
+      <div class="w-full max-w-md desk-paper-sheet p-8 text-center shadow-xl border border-rose-300">
+        <div class="w-14 h-14 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-center mx-auto mb-4 text-rose-600">
+          <mat-icon class="text-3xl">domain_disabled</mat-icon>
+        </div>
+        <h3 class="text-xl font-bold text-stone-900 tracking-tight font-serif">Vitrine Indisponível</h3>
+        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+          O portal público desta empresa não pôde ser localizado ou ainda não foi publicado no OS.
+        </p>
+        <div class="mt-6 pt-4 border-t border-stone-200">
+          <a routerLink="/" class="text-xs font-bold text-amber-900 hover:text-amber-950 flex items-center justify-center gap-1 font-serif">
+            <mat-icon class="text-[16px]">arrow_back</mat-icon>
+            Voltar para a Bancada Central
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 3. RENDER SPACE -->
+  @if (!loading() && !error() && data(); as space) {
+    <div class="relative z-10 flex flex-col min-h-screen">
+
+      <!-- Draft/Preview Top Warning Banner -->
+      @if (space.status === 'draft') {
+        <div class="bg-amber-600 text-amber-950 px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-2 relative z-50 shadow-md">
+          <mat-icon class="text-[18px]">warning</mat-icon>
+          <span class="font-mono">Visualização de Rascunho · Este catálogo ainda não está visível para o público geral.</span>
+        </div>
+      }
+
+      <!-- Header (Walnut Counter with Brass Plaque) -->
+      <header class="border-b border-amber-900/50 sticky top-0 z-40 backdrop-blur-md bg-[#19110a]/90 text-amber-100 shadow-md">
+        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+          
+          <!-- Brand Logo and Title -->
+          <div class="flex items-center gap-4">
+            @if (space.logo) {
+              <img [src]="space.logo" alt="Logo" class="w-11 h-11 rounded-xl object-cover border border-amber-400/40 shadow-sm">
+            } @else {
+              <div class="w-11 h-11 rounded-xl desk-brass-plate flex items-center justify-center text-amber-950 shadow-sm">
+                <mat-icon>store</mat-icon>
+              </div>
+            }
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-base font-black tracking-tight text-amber-100 font-serif leading-none">{{ space.title }}</h1>
+                <span class="desk-stamp-badge desk-stamp-official text-[8px] py-0.5 px-1.5 font-mono">VITRINE REGISTRADA</span>
+              </div>
+              <span class="text-[10px] uppercase font-bold tracking-wider text-amber-300/70 font-mono mt-1 block">Espaço Comercial Público</span>
+            </div>
+          </div>
+
+          <!-- Contact Shortcut & Nav -->
+          <div class="flex items-center gap-3">
+            @if (space.phone) {
+              <a [href]="'tel:' + space.phone" 
+                 class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-amber-200 hover:text-white transition-colors font-mono">
+                <mat-icon class="text-[16px] text-amber-400">phone</mat-icon>
+                {{ space.phone }}
+              </a>
+            }
+            <a routerLink="/marketplace" class="text-xs text-amber-200 hover:text-white flex items-center gap-1 hidden md:inline-flex">
+              <mat-icon class="text-xs">storefront</mat-icon>
+              Catálogo
+            </a>
+            <a href="#contato" 
+               class="px-4 py-2.5 desk-brass-button text-xs font-bold rounded-xl shadow whitespace-nowrap font-serif">
+              Falar Conosco
+            </a>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- Main Template Container Resting on Wood Background -->
+      <div class="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 space-y-8 flex-1">
+        
+        <!-- TEMPLATE 1: RESTAURANTE -->
+        @if (space.templateId === 'restaurant') {
+          <app-restaurant-template [space]="space" (addToCart)="onAddProduct($event)" />
+        }
+
+        <!-- TEMPLATE 2: VAREJO -->
+        @if (space.templateId === 'retail') {
+          <app-retail-template [space]="space" (addToCart)="onAddProduct($event)" />
+        }
+
+        <!-- TEMPLATE 3: BUSINESS -->
+        @if (space.templateId === 'business') {
+          <app-business-template [space]="space" (addToCart)="onAddProduct($event)" />
+        }
+
+      </div>
+
+      <!-- UNIFIED FOOTER -->
+      <app-public-space-footer [space]="space" />
+
+      <!-- Slide-over Cart Drawer for Public Web Portal -->
+      <app-public-space-cart-drawer />
+
+    </div>
+  }
+
+</div>

@@ -1,0 +1,5 @@
+{
+  "summary": "Relatório consolidado de verificação de artefatos e estado atual do ecossistema 3eatcru OS: validação de 96 testes no Vitest (100% de aprovação em 16 arquivos), zero erros de linting (ng lint), resolução de tipagem estrita no módulo CRM (OsEvent<CustomerUpdatedPayload>), status da arquitetura Dual-OS (Varejo e Restaurantes), tema DEsk físico-skeuomórfico e integridade da persistência SQLite.",
+  "updatedAt": "2026-10-20T02:07:39.919782927Z",
+  "userFacing": true
+}

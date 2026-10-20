@@ -1,0 +1,6 @@
+{
+  "summary": "Plano detalhado de auditoria e correção do Marketplace (Fichário Comercial) do 3eatcru OS: resolução de bugs visuais e melhorias de UI/UX (incorporação do 3eatcru ID no cabeçalho, conformidade com a convenção de barras superiores, tipografia tabular-nums e robustez da Mesa Cartográfica com fallback sem quebras) e integração bidirecional completa com os módulos de KDS/Mesas, WhatsApp, Telegram, CRM/Fidelidade e Estoque.",
+  "updatedAt": "2026-10-20T07:04:51.517259074Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

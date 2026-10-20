@@ -1,0 +1,5 @@
+{
+  "summary": "Resumo da execução da auditoria, correção e aprimoramento do Runtime OS: implementação do registro unificado de processos com PIDs e telemetria de CPU/memória, supervisão contínua para aplicativos em background, isolamento estrito de sandbox através do OsContext, sincronização com o Gerenciador de Tarefas (Zero-Pill + tabular-nums) e suíte de 102 testes automatizados aprovada no Vitest.",
+  "updatedAt": "2026-10-20T02:28:02.117838610Z",
+  "userFacing": true
+}

@@ -1,0 +1,11 @@
+{
+  "idemp_pos_lda_1792524525448": {
+    "status": "ACK",
+    "processedAt": "2026-10-20T19:28:45.543Z",
+    "response": {
+      "opId": "op_sale_01",
+      "action": "sale.create",
+      "companyId": "comp_londrina_gastro_01"
+    }
+  }
+}

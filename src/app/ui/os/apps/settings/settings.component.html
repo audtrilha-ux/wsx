@@ -1,0 +1,1003 @@
+<div class="h-full flex bg-slate-50 font-sans overflow-hidden">
+  
+  <!-- Settings Sidebar -->
+  <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
+    <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-800">
+        <mat-icon>settings</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900 leading-none">Painel OS</h2>
+        <span class="text-xs text-slate-500">Configurações do Core</span>
+      </div>
+    </div>
+    
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <button 
+        (click)="selectTab('profile')"
+        [class]="activeTab() === 'profile' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-indigo-600]="activeTab() === 'profile'">corporate_fare</mat-icon>
+        Perfil da Empresa / Loja
+      </button>
+
+      <button 
+        (click)="selectTab('billing')"
+        [class]="activeTab() === 'billing' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-amber-600]="activeTab() === 'billing'">payments</mat-icon>
+        Licença & Faturamento (SaaS)
+      </button>
+
+      <button 
+        (click)="selectTab('device')"
+        [class]="activeTab() === 'device' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-indigo-600]="activeTab() === 'device'">devices</mat-icon>
+        Dispositivo / Device
+      </button>
+
+      <button 
+        (click)="selectTab('hardware')"
+        [class]="activeTab() === 'hardware' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-teal-600]="activeTab() === 'hardware'">dns</mat-icon>
+        Periféricos & Hardware
+      </button>
+
+      <button 
+        (click)="selectTab('printing')"
+        [class]="activeTab() === 'printing' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-rose-600]="activeTab() === 'printing'">print</mat-icon>
+        Fila de Impressão
+      </button>
+
+      <button 
+        (click)="selectTab('configuration')"
+        [class]="activeTab() === 'configuration' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-amber-600]="activeTab() === 'configuration'">tune</mat-icon>
+        Configurações do Sistema
+      </button>
+
+      <button 
+        (click)="selectTab('diagnostics')"
+        [class]="activeTab() === 'diagnostics' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-blue-600]="activeTab() === 'diagnostics'">healing</mat-icon>
+        Diagnósticos & Saúde
+      </button>
+
+      <button 
+        (click)="selectTab('update')"
+        [class]="activeTab() === 'update' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-emerald-600]="activeTab() === 'update'">system_update_alt</mat-icon>
+        Atualização / Update
+      </button>
+
+      <button 
+        (click)="selectTab('sync')"
+        [class]="activeTab() === 'sync' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:bg-slate-50'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition-colors">
+        <mat-icon [class.text-indigo-600]="activeTab() === 'sync'">sync</mat-icon>
+        Sincronização & Sync
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Settings Panel Content -->
+  <main class="flex-1 overflow-y-auto p-8 bg-slate-50">
+    
+    <!-- Tab 0: Profile (Empresa / Loja) -->
+    @if (activeTab() === 'profile') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Perfil da Empresa & Integrações</h3>
+          <p class="text-sm text-slate-500 mt-1">Gerencie a identidade pública do seu negócio, escolha o modo operacional do OS e configure chaves de homologação.</p>
+        </div>
+
+        <!-- Modo do Sistema Operacional (Varejo x Restaurantes) -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Modo Operacional do 3eatcru OS</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Selecione o modelo do seu estabelecimento para carregar os aplicativos pré-instalados ideais.</p>
+            </div>
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded"
+                  [ngClass]="activeProfile() === 'retail' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'">
+              {{ activeProfile() === 'retail' ? 'Modo Varejo Ativo' : 'Modo Restaurante Ativo' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Varejo Card -->
+            <div 
+              tabindex="0"
+              role="button"
+              (click)="selectOperationalProfile('retail')"
+              (keydown.enter)="selectOperationalProfile('retail')"
+              (keydown.space)="selectOperationalProfile('retail')"
+              [class]="activeProfile() === 'retail' 
+                ? 'border-2 border-emerald-600 bg-emerald-50/40 shadow-sm' 
+                : 'border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+              class="p-4 rounded-xl cursor-pointer transition-all flex flex-col justify-between space-y-3">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <mat-icon class="text-lg">storefront</mat-icon>
+                    </div>
+                    <span class="font-bold text-sm text-slate-900">Varejo & Comércio</span>
+                  </div>
+                  @if (activeProfile() === 'retail') {
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  }
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  Para mercados, lojas de roupas, conveniências e comércio varejista com foco em giro rápido de estoque e caixa.
+                </p>
+                <div class="pt-2 border-t border-slate-100 space-y-1">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Suíte Pré-instalada</span>
+                  <div class="flex flex-wrap gap-1 text-[11px] text-slate-700">
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">PDV Caixa</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">Estoque</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">CRM Clientes</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">Telegram Bot</span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                type="button"
+                (click)="selectOperationalProfile('retail'); $event.stopPropagation()"
+                [class]="activeProfile() === 'retail' ? 'bg-emerald-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'"
+                class="w-full py-2 px-3 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                <mat-icon class="text-sm">{{ activeProfile() === 'retail' ? 'check_circle' : 'swap_horiz' }}</mat-icon>
+                {{ activeProfile() === 'retail' ? 'Modo em Operação' : 'Mudar para Varejo' }}
+              </button>
+            </div>
+
+            <!-- Restaurante Card -->
+            <div 
+              tabindex="0"
+              role="button"
+              (click)="selectOperationalProfile('restaurant')"
+              (keydown.enter)="selectOperationalProfile('restaurant')"
+              (keydown.space)="selectOperationalProfile('restaurant')"
+              [class]="activeProfile() === 'restaurant' 
+                ? 'border-2 border-amber-600 bg-amber-50/40 shadow-sm' 
+                : 'border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+              class="p-4 rounded-xl cursor-pointer transition-all flex flex-col justify-between space-y-3">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+                      <mat-icon class="text-lg">restaurant</mat-icon>
+                    </div>
+                    <span class="font-bold text-sm text-slate-900">Restaurantes & Gastronomia</span>
+                  </div>
+                  @if (activeProfile() === 'restaurant') {
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  }
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  Para restaurantes, bares, lanchonetes e cafeterias com foco em salão, mapa de mesas, comandas e KDS de cozinha.
+                </p>
+                <div class="pt-2 border-t border-slate-100 space-y-1">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Suíte Pré-instalada</span>
+                  <div class="flex flex-wrap gap-1 text-[11px] text-slate-700">
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">Mesas & KDS</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">Financeiro & Caixa</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">PDV Balcão</span>
+                    <span class="bg-slate-100 px-2 py-0.5 rounded">Estoque Insumos</span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                type="button"
+                (click)="selectOperationalProfile('restaurant'); $event.stopPropagation()"
+                [class]="activeProfile() === 'restaurant' ? 'bg-amber-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'"
+                class="w-full py-2 px-3 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5">
+                <mat-icon class="text-sm">{{ activeProfile() === 'restaurant' ? 'check_circle' : 'swap_horiz' }}</mat-icon>
+                {{ activeProfile() === 'restaurant' ? 'Modo em Operação' : 'Mudar para Restaurante' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados Gerais -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <h4 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Identificação Corporativa</h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="space-y-1">
+              <label for="company-name" class="font-semibold text-slate-500 block">Razão Social / Nome de Fantasia</label>
+              <input id="company-name" type="text" [value]="profileName()" disabled class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-500 outline-none cursor-not-allowed">
+              <span class="text-[9px] text-slate-400">Gerenciado pelo provisionamento do Tenant central</span>
+            </div>
+
+            <div class="space-y-1">
+              <label for="profile-cnpj" class="font-semibold text-slate-500 block">CNPJ / CPF</label>
+              <input id="profile-cnpj" type="text" [value]="profileCnpj()" (change)="updateProfileValue('company_cnpj', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="space-y-1">
+              <label for="profile-segment" class="font-semibold text-slate-500 block">Segmento do Negócio</label>
+              <input id="profile-segment" type="text" [value]="profileSegment()" (change)="updateProfileValue('company_segment', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="space-y-1">
+              <label for="profile-email" class="font-semibold text-slate-500 block">E-mail Comercial</label>
+              <input id="profile-email" type="email" [value]="profileEmail()" (change)="updateProfileValue('company_email', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="space-y-1 md:col-span-2">
+              <label for="profile-address" class="font-semibold text-slate-500 block">Endereço Comercial</label>
+              <input id="profile-address" type="text" [value]="profileAddress()" (change)="updateProfileValue('company_address', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="space-y-1">
+              <label for="profile-phone" class="font-semibold text-slate-500 block">Telefone de Contato</label>
+              <input id="profile-phone" type="text" [value]="profilePhone()" (change)="updateProfileValue('company_phone', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div class="space-y-1">
+              <label for="profile-hours" class="font-semibold text-slate-500 block">Horário de Funcionamento</label>
+              <input id="profile-hours" type="text" [value]="profileHours()" (change)="updateProfileValue('company_hours', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none">
+              <span class="text-[9px] text-slate-400">Ex: Seg - Sab: 09:00 às 22:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados de Integração / Sandbox -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+            <mat-icon class="text-amber-500 text-sm">settings_input_component</mat-icon>
+            <h4 class="font-bold text-slate-800 text-sm">Parâmetros de Integração (Sandbox)</h4>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Configure abaixo as chaves e números virtuais simulados utilizados pelos módulos de canais (WhatsApp, Telegram e iFood) para recepção e logs de teste em ambiente de desenvolvimento.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
+            <div class="space-y-1">
+              <label for="whatsapp-sandbox-num" class="font-semibold text-slate-500 block">Número do WhatsApp (Sandbox)</label>
+              <input id="whatsapp-sandbox-num" type="text" [value]="whatsappSandboxNum()" (change)="updateProfileValue('whatsapp_sandbox_num', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none font-mono">
+              <span class="text-[9px] text-slate-400">Número de envio simulado do canal do WhatsApp</span>
+            </div>
+
+            <div class="space-y-1">
+              <label for="ifood-sandbox-id" class="font-semibold text-slate-500 block">Merchant ID iFood (Sandbox)</label>
+              <input id="ifood-sandbox-id" type="text" [value]="ifoodSandboxId()" (change)="updateProfileValue('ifood_sandbox_id', $any($event.target).value)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:ring-1 focus:ring-indigo-500 outline-none font-mono">
+              <span class="text-[9px] text-slate-400">Identificador do estabelecimento para webhook iFood</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tab: Billing (SaaS Licenciamento & Faturamento) -->
+    @if (activeTab() === 'billing') {
+      <div class="max-w-4xl space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Licença & Faturamento SaaS</h3>
+            <p class="text-sm text-slate-500 mt-1">Gerencie a assinatura do seu Workspace, consulte faturas pendentes e efetue pagamentos via Pix.</p>
+          </div>
+          <button (click)="loadBillingInfo()" class="flex items-center gap-2 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+            <mat-icon class="text-slate-500 text-sm">refresh</mat-icon>
+            Atualizar
+          </button>
+        </div>
+
+        <!-- Visão Geral de Assinatura -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Status da Conta</span>
+            <div class="flex items-center gap-2">
+              @if (identityService.currentTenant()?.status === 'active') {
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-base font-bold text-green-700">WORKSPACE ATIVO</span>
+              } @else {
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                <span class="text-base font-bold text-rose-700">SUSPENSO (DÉBITO)</span>
+              }
+            </div>
+            <p class="text-xs text-slate-500 leading-tight">
+              @if (identityService.currentTenant()?.status === 'active') {
+                Workspace em situação regular com o Control Plane 3eatcru.
+              } @else {
+                Acesso bloqueado por inadimplência. Efetue o pagamento da fatura em aberto.
+              }
+            </p>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Plano Contratado</span>
+            <span class="text-lg font-extrabold text-slate-800 uppercase tracking-wide">
+              {{ identityService.currentTenant()?.plan || 'PRO' }}
+            </span>
+            <span class="text-xs text-slate-500 block">Renovação automática mensal</span>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Saldo do Ledger</span>
+            <div class="flex items-baseline gap-1">
+              <span class="text-xs text-slate-400">R$</span>
+              <span class="text-xl font-extrabold" [class.text-red-600]="(identityService.currentTenant()?.balance || 0) < 0" [class.text-green-600]="(identityService.currentTenant()?.balance || 0) >= 0">
+                {{ (identityService.currentTenant()?.balance || 0).toFixed(2) }}
+              </span>
+            </div>
+            <span class="text-xs text-slate-500 block">Saldo na conta core central</span>
+          </div>
+        </div>
+
+        <!-- Seção de Pagamento Ativo (QR Code Pix) -->
+        @if (activePaymentOrder(); as order) {
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 space-y-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+                <mat-icon>qr_code_2</mat-icon>
+              </div>
+              <div class="flex-1 space-y-1">
+                <h4 class="text-sm font-bold text-amber-900">Aguardando Pagamento do Pix</h4>
+                <p class="text-xs text-amber-700 leading-relaxed">
+                  Para efetuar o pagamento da fatura, escaneie o QR Code abaixo ou utilize o código Copia e Cola no app do seu banco.
+                </p>
+                <div class="text-[10px] font-mono text-slate-500 mt-1">ID da Ordem: {{ order.id }}</div>
+              </div>
+              <button (click)="activePaymentOrder.set(null)" class="text-slate-400 hover:text-slate-600">
+                <mat-icon class="text-lg">close</mat-icon>
+              </button>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center gap-6 bg-white p-4 rounded-lg border border-amber-100">
+              <div class="w-40 h-40 bg-slate-100 rounded-lg flex flex-col items-center justify-center p-3 border border-slate-200 shrink-0 select-none">
+                <div class="w-full h-full border-4 border-slate-800 rounded flex flex-wrap p-1 relative">
+                  <div class="absolute top-1 left-1 w-6 h-6 border-4 border-slate-800"></div>
+                  <div class="absolute top-1 right-1 w-6 h-6 border-4 border-slate-800"></div>
+                  <div class="absolute bottom-1 left-1 w-6 h-6 border-4 border-slate-800"></div>
+                  <div class="w-full h-full flex items-center justify-center">
+                    <mat-icon class="text-slate-800 text-4xl">pix</mat-icon>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex-1 space-y-3 w-full">
+                <div class="space-y-1">
+                  <span class="text-xs font-bold text-slate-600 block">Pix Copia e Cola:</span>
+                  <div class="flex gap-2">
+                    <input type="text" [value]="order.qrCodeCopyPaste" readonly class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 font-mono outline-none">
+                    <button (click)="notify('Pix Copiado', 'Chave copia-e-cola enviada para a área de transferência.', 'success')" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0">
+                      Copiar
+                    </button>
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3 flex flex-col sm:flex-row gap-3">
+                  <button 
+                    [disabled]="isConfirmingPayment()"
+                    (click)="confirmPayment(order.id)" 
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-300 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                    @if (isConfirmingPayment()) {
+                      <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Confirmando...
+                    } @else {
+                      <mat-icon>task_alt</mat-icon>
+                      Simular Confirmação Pix (Gateway Callback)
+                    }
+                  </button>
+                  <button (click)="activePaymentOrder.set(null)" class="bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 px-4 py-2 rounded-lg text-xs font-medium transition-colors">
+                    Voltar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Lista de Faturas -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h4 class="font-bold text-slate-800 text-sm">Histórico de Faturas de Assinatura</h4>
+            <span class="text-xs text-slate-400">Total de faturas: {{ invoices().length }}</span>
+          </div>
+
+          @if (isLoadingBilling()) {
+            <div class="p-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
+              <div class="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-xs font-medium">Carregando faturamento...</span>
+            </div>
+          } @else if (invoices().length === 0) {
+            <div class="p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
+              <mat-icon class="text-4xl text-slate-300">receipt_long</mat-icon>
+              <p class="text-sm font-medium">Nenhuma fatura gerada para este Workspace.</p>
+              <span class="text-xs text-slate-400">Faturas são emitidas no final de cada período de faturamento.</span>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+                    <th class="p-4">Fatura</th>
+                    <th class="p-4">Período</th>
+                    <th class="p-4">Vencimento</th>
+                    <th class="p-4">Valor Total</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (inv of invoices(); track inv.id) {
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-0">
+                      <td class="p-4 font-mono font-bold text-slate-800">#{{ inv.invoiceNumber }}</td>
+                      <td class="p-4 text-slate-600">{{ inv.billingPeriod }}</td>
+                      <td class="p-4 text-slate-600">{{ inv.dueDate | date:'dd/MM/yyyy' }}</td>
+                      <td class="p-4 font-bold text-slate-800">R$ {{ inv.totalAmount.toFixed(2) }}</td>
+                      <td class="p-4">
+                        @if (inv.status === 'PAID') {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
+                            PAGO
+                          </span>
+                        } @else if (inv.status === 'PENDING') {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            PENDENTE
+                          </span>
+                        } @else if (inv.status === 'PAYMENT_CREATED') {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                            AGUARDANDO PIX
+                          </span>
+                        } @else if (inv.status === 'OVERDUE') {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            ATRASADA
+                          </span>
+                        } @else {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                            {{ inv.status }}
+                          </span>
+                        }
+                      </td>
+                      <td class="p-4 text-right">
+                        @if (inv.status === 'PENDING' || inv.status === 'OVERDUE' || inv.status === 'PAYMENT_CREATED') {
+                          <button (click)="payInvoice(inv.id)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                            Pagar com Pix
+                          </button>
+                        } @else {
+                          <span class="text-slate-400 text-xs">—</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Tab 1: Device -->
+    @if (activeTab() === 'device') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Configuração de Dispositivo</h3>
+          <p class="text-sm text-slate-500 mt-1">Identidade e autenticação local deste terminal perante o Core OS e a Central.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-slate-400">ID de Instalação:</span>
+              <p class="font-mono font-medium text-slate-800">{{ deviceService.deviceState().installationId || 'N/A (Acesso Web)' }}</p>
+            </div>
+            <div>
+              <span class="text-slate-400">ID de Hardware (Device ID):</span>
+              <p class="font-mono font-medium text-slate-800">{{ deviceService.deviceState().deviceId || 'N/A (Acesso Web)' }}</p>
+            </div>
+            <div>
+              <span class="text-slate-400">Plataforma Atual:</span>
+              <p class="font-medium text-slate-800 capitalize">{{ deviceService.deviceState().platform }}</p>
+            </div>
+            <div>
+              <span class="text-slate-400">Versão do SO:</span>
+              <p class="font-medium text-slate-800">{{ deviceService.deviceState().osVersion }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <h4 class="font-semibold text-slate-800">Pareamento</h4>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs text-slate-500 block">Status de Pareamento</span>
+              @if (deviceService.isPaired()) {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1">
+                  Pareado com: {{ deviceService.deviceState().pairedDevice }}
+                </span>
+              } @else {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mt-1">
+                  Não Pareado / Aguardando
+                </span>
+              }
+            </div>
+
+            <div>
+              @if (deviceService.isPaired()) {
+                <button (click)="unpair()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  Desparear Terminal
+                </button>
+              } @else {
+                <div class="flex gap-2">
+                  <input #deviceName type="text" placeholder="Ex: Terminal-Caixa" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <button (click)="pair(deviceName.value)" class="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Parear Dispositivo
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tab 2: Hardware -->
+    @if (activeTab() === 'hardware') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Hardware & Periféricos</h3>
+          <p class="text-sm text-slate-500 mt-1">Gerencie a abstração de hardware conectada ao sistema local.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm">
+                <th class="p-4 font-medium">Periférico</th>
+                <th class="p-4 font-medium">Tipo</th>
+                <th class="p-4 font-medium">Status do Driver</th>
+                <th class="p-4 font-medium text-right">Ação Rápida (Teste)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of hardwareService.peripherals(); track p.id) {
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-0">
+                  <td class="p-4">
+                    <div class="font-medium text-slate-800">{{ p.name }}</div>
+                    <span class="text-xs font-mono text-slate-400">{{ p.id }}</span>
+                  </td>
+                  <td class="p-4 text-slate-600 capitalize text-sm">{{ p.type.replace('_', ' ') }}</td>
+                  <td class="p-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          [ngClass]="{
+                            'bg-green-100 text-green-800': p.status === 'online',
+                            'bg-amber-100 text-amber-800': p.status === 'no_paper',
+                            'bg-red-100 text-red-800': p.status === 'offline' || p.status === 'error'
+                          }">
+                      {{ p.status }}
+                    </span>
+                  </td>
+                  <td class="p-4 text-right">
+                    <button (click)="togglePeripheralStatus(p)" class="text-xs font-medium text-indigo-600 hover:underline">
+                      Alternar Status
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Painel de Simulação de Periféricos em Tempo Real -->
+        <div class="border-t border-slate-200 pt-6 space-y-4">
+          <div>
+            <h4 class="text-md font-bold text-slate-800">Simulador de Periféricos (Tempo Real)</h4>
+            <p class="text-xs text-slate-500">Teste as chamadas físicas de barramento diretamente pelo painel do OS.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- Card 1: Balança Digital -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between space-y-3">
+              <div class="flex justify-between items-start">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <mat-icon class="text-sm text-slate-600">scale</mat-icon>
+                  Balança Digital
+                </span>
+                @if (scaleWeight() > 0) {
+                  <span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded-full">ESTÁVEL</span>
+                } @else {
+                  <span class="bg-slate-200 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">AGUARDANDO</span>
+                }
+              </div>
+              
+              <div class="bg-black rounded-lg p-3 text-center font-mono text-xl text-emerald-400 border border-slate-800">
+                {{ scaleWeight() | number:'1.3-3' }} <span class="text-xs">kg</span>
+              </div>
+
+              <button 
+                (click)="simulateScaleRead()"
+                class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                <mat-icon class="text-xs">sync_alt</mat-icon>
+                Simular Leitura
+              </button>
+            </div>
+
+            <!-- Card 2: Leitor de Código de Barras -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between space-y-3">
+              <div class="flex justify-between items-start">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <mat-icon class="text-sm text-slate-600">qr_code_scanner</mat-icon>
+                  Leitor de Códigos
+                </span>
+              </div>
+              
+              <div class="space-y-1.5">
+                <label for="barcode-mock-input" class="text-[10px] text-slate-500 font-semibold block">Código de Barras</label>
+                <input 
+                  #barcodeMockInput
+                  id="barcode-mock-input"
+                  type="text" 
+                  value="7891000315504" 
+                  class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-indigo-500 font-mono outline-none">
+              </div>
+
+              <button 
+                (click)="simulateBarcodeScan(barcodeMockInput.value)"
+                class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                <mat-icon class="text-xs">play_arrow</mat-icon>
+                Disparar Gatilho
+              </button>
+            </div>
+
+            <!-- Card 3: Display de Cliente LCD -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between space-y-3">
+              <div class="flex justify-between items-start">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <mat-icon class="text-sm text-slate-600">monitor</mat-icon>
+                  Display VFD
+                </span>
+              </div>
+              
+              <!-- Retro display monitor representation -->
+              <div class="bg-slate-950 text-cyan-400 font-mono text-[10px] p-2.5 rounded-lg border border-slate-800 leading-tight space-y-0.5 tracking-widest uppercase">
+                <div>{{ customerDisplayLine1() }}</div>
+                <div>{{ customerDisplayLine2() }}</div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-1.5">
+                <input #lcd1 type="text" [value]="customerDisplayLine1()" placeholder="Linha 1" class="bg-white border border-slate-200 rounded px-2 py-1 text-[10px] text-slate-800 outline-none">
+                <input #lcd2 type="text" [value]="customerDisplayLine2()" placeholder="Linha 2" class="bg-white border border-slate-200 rounded px-2 py-1 text-[10px] text-slate-800 outline-none">
+              </div>
+
+              <button 
+                (click)="simulateCustomerDisplay(lcd1.value, lcd2.value)"
+                class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                <mat-icon class="text-xs">publish</mat-icon>
+                Enviar Texto
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- Tab 3: Printing -->
+    @if (activeTab() === 'printing') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Fila de Impressão Modular</h3>
+          <p class="text-sm text-slate-500 mt-1">Gerencie trabalhos de impressão e perfis de folha.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+          <h4 class="font-semibold text-slate-800 border-b border-slate-100 pb-3">Perfil da Impressora Ativa</h4>
+          
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <label for="paper-width-select" class="block text-slate-500 mb-1">Largura da Bobina</label>
+              <select id="paper-width-select" [value]="printerService.profile().paperWidth" (change)="printerService.updateProfile({paperWidth: $any($event.target).value})" class="w-full px-3 py-2 border border-slate-200 rounded-lg">
+                <option value="80mm">80mm (Padrão)</option>
+                <option value="58mm">58mm (Compacto)</option>
+              </select>
+            </div>
+            <div>
+              <label for="default-copies-input" class="block text-slate-500 mb-1">Cópias padrão</label>
+              <input id="default-copies-input" type="number" [value]="printerService.profile().copies" (input)="printerService.updateProfile({copies: +$any($event.target).value})" class="w-full px-3 py-2 border border-slate-200 rounded-lg">
+            </div>
+            <div class="col-span-2">
+              <label for="custom-header-input" class="block text-slate-500 mb-1">Cabeçalho Personalizado</label>
+              <input id="custom-header-input" type="text" [value]="printerService.profile().header" (input)="printerService.updateProfile({header: $any($event.target).value})" class="w-full px-3 py-2 border border-slate-200 rounded-lg">
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button (click)="testPrint()" class="bg-slate-900 text-white hover:bg-slate-800 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+              <mat-icon class="text-[18px]">print</mat-icon>
+              Imprimir Página de Teste
+            </button>
+          </div>
+        </div>
+
+        <!-- Print Queue History -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <h4 class="font-semibold text-slate-800">Histórico de Trabalhos Recentes</h4>
+          <div class="space-y-3">
+            @for (job of printerService.jobs(); track job.id) {
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                <div>
+                  <div class="text-sm font-semibold text-slate-800">{{ job.title }}</div>
+                  <span class="text-xs font-mono text-slate-400">{{ job.id }} • {{ job.createdAt | date:'HH:mm:ss' }}</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800': job.status === 'printing',
+                        'bg-green-100 text-green-800': job.status === 'completed',
+                        'bg-amber-100 text-amber-800': job.status === 'pending'
+                      }">
+                  {{ job.status }}
+                </span>
+              </div>
+            }
+            @if (printerService.jobs().length === 0) {
+              <p class="text-sm text-slate-400 text-center py-4">Nenhum documento na fila de impressão ainda.</p>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tab 4: Configuration -->
+    @if (activeTab() === 'configuration') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Escopos de Configuração</h3>
+          <p class="text-sm text-slate-500 mt-1">Visualize e defina chaves de configuração do OS mapeadas de forma estruturada.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-500 uppercase tracking-wider">
+            Variáveis de Configuração Ativas
+          </div>
+          <div class="divide-y divide-slate-100">
+            @for (c of configService.configs(); track c.key) {
+              <div class="p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                <div>
+                  <div class="text-sm font-semibold text-slate-800 font-mono">{{ c.key }}</div>
+                  <span class="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full mt-1 inline-block font-mono">
+                    Scope: {{ c.scope }}
+                  </span>
+                </div>
+                <div class="text-sm text-slate-600 font-medium font-mono bg-slate-100/50 px-3 py-1.5 rounded border border-slate-200/50">
+                  {{ c.value }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tab 5: Diagnostics -->
+    @if (activeTab() === 'diagnostics') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Diagnósticos & Saúde do Sistema</h3>
+          <p class="text-sm text-slate-500 mt-1">Execute testes unificados de integridade nas camadas de Core, Rede, Hardware e Atualização.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between">
+          <div>
+            <h4 class="font-semibold text-slate-800">Verificação Completa</h4>
+            <p class="text-sm text-slate-500 mt-1">Este teste analisa a resposta e os drivers de todos os subsistemas.</p>
+          </div>
+          <button 
+            [disabled]="isRunningDiag()"
+            (click)="runDiagnostics()"
+            class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2">
+            @if (isRunningDiag()) {
+              <mat-icon class="animate-spin text-[20px]">autorenew</mat-icon>
+              Analisando...
+            } @else {
+              <mat-icon class="text-[20px]">healing</mat-icon>
+              Executar Diagnóstico
+            }
+          </button>
+        </div>
+
+        @if (diagReport(); as report) {
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <span class="text-sm font-bold text-slate-700">Relatório de Integridade</span>
+              <span class="text-xs text-slate-400">Último teste: {{ report.timestamp | date:'HH:mm:ss' }}</span>
+            </div>
+            
+            <div class="p-6 border-b border-slate-100 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center"
+                   [ngClass]="{
+                     'bg-green-100 text-green-600': report.overallStatus === 'healthy',
+                     'bg-amber-100 text-amber-600': report.overallStatus === 'warning',
+                     'bg-red-100 text-red-600': report.overallStatus === 'critical'
+                   }">
+                <mat-icon class="text-3xl">
+                  {{ report.overallStatus === 'healthy' ? 'check_circle' : report.overallStatus === 'warning' ? 'warning' : 'error' }}
+                </mat-icon>
+              </div>
+              <div>
+                <h5 class="font-bold text-slate-900 capitalize">Resultado: {{ report.overallStatus }}</h5>
+                <p class="text-sm text-slate-500">
+                  {{ report.overallStatus === 'healthy' ? 'Todos os subsistemas operam normalmente.' : 'Alguns problemas foram identificados e requerem atenção.' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="divide-y divide-slate-100">
+              @for (check of report.checks; track check.subsystem) {
+                <div class="p-4 flex items-start gap-4">
+                  <div class="mt-0.5">
+                    <mat-icon [class]="{
+                      'text-green-500': check.status === 'healthy',
+                      'text-amber-500': check.status === 'warning',
+                      'text-red-500': check.status === 'critical'
+                    }">
+                      {{ check.status === 'healthy' ? 'check' : check.status === 'warning' ? 'warning' : 'error' }}
+                    </mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-sm font-bold text-slate-800">{{ check.subsystem }}</div>
+                    <p class="text-xs text-slate-500 mt-0.5">{{ check.details }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Tab 6: Update -->
+    @if (activeTab() === 'update') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Gerenciador de Atualizações</h3>
+          <p class="text-sm text-slate-500 mt-1">Cheque, instale e controle as versões instaladas do Core OS.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs text-slate-500 block">Versão Atual Instalada</span>
+              <span class="text-2xl font-mono font-bold text-slate-900">{{ updateState().currentVersion }}</span>
+            </div>
+            
+            <div class="flex gap-3">
+              @if (updateState().latestVersion !== updateState().currentVersion && updateState().status === 'idle') {
+                <button (click)="installUpdate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                  <mat-icon class="text-[18px]">download</mat-icon>
+                  Instalar Nova Versão ({{ updateState().latestVersion }})
+                </button>
+              } @else if (updateState().status === 'idle') {
+                <button (click)="checkUpdates()" class="bg-slate-900 text-white hover:bg-slate-800 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                  <mat-icon class="text-[18px]">cached</mat-icon>
+                  Verificar Atualizações
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Progress indicators -->
+          @if (updateState().status === 'downloading' || updateState().status === 'installing') {
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs text-slate-500 font-semibold">
+                <span class="capitalize">Estado: {{ updateState().status }}</span>
+                <span>{{ updateState().progress }}%</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2">
+                <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300" [style.width.%]="updateState().progress"></div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Release notes -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <h4 class="font-semibold text-slate-800">Notas de Lançamento (Release Notes)</h4>
+          <ul class="space-y-3">
+            @for (note of updateState().releaseNotes; track note) {
+              <li class="flex gap-3 text-sm text-slate-600">
+                <mat-icon class="text-emerald-500 shrink-0 text-[18px] mt-0.5">check_circle_outline</mat-icon>
+                <span>{{ note }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+
+    <!-- Tab 7: Sync -->
+    @if (activeTab() === 'sync') {
+      <div class="max-w-3xl space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900">Sincronização & Storage Local</h3>
+          <p class="text-sm text-slate-500 mt-1">Gerencie a conectividade e a fila de sincronização do terminal.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+          
+          <!-- Sync Status Card -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+            <h4 class="font-semibold text-slate-800">Estado da Conexão</h4>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full" [ngClass]="isOnline() ? 'bg-green-500' : 'bg-red-500'"></div>
+                <span class="text-sm font-medium" [ngClass]="isOnline() ? 'text-green-700' : 'text-red-700'">
+                  {{ isOnline() ? 'Online (Conectado à Central)' : 'Offline (Modo Local)' }}
+                </span>
+              </div>
+              <button (click)="toggleOnline()" class="text-xs px-3 py-1.5 border border-slate-200 hover:bg-slate-50 rounded-lg font-medium transition-colors">
+                Alternar Rede
+              </button>
+            </div>
+            <div class="text-xs text-slate-500 pt-2 border-t border-slate-100">
+              <span class="font-semibold">Último Sync:</span> {{ lastSyncedAt() ? (lastSyncedAt() | date:'dd/MM/yyyy HH:mm:ss') : 'Nunca' }}
+            </div>
+          </div>
+
+          <!-- Outbox Controls -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+            <h4 class="font-semibold text-slate-800">Fila de Envio (Outbox)</h4>
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-2xl font-bold text-slate-900">{{ outbox().length }}</span>
+                <span class="text-xs text-slate-500 block">Itens pendentes no Outbox</span>
+              </div>
+              <div class="flex flex-col gap-2">
+                <button (click)="queueTestOp()" class="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
+                  + Venda em Fila
+                </button>
+                <button 
+                  [disabled]="outbox().length === 0 || !isOnline()"
+                  (click)="triggerSync()"
+                  class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors">
+                  Enviar Sincronismo
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pending operations list -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <h4 class="font-semibold text-slate-800">Transações na Fila Offline (Outbox Queue)</h4>
+          <div class="divide-y divide-slate-100">
+            @for (op of outbox(); track op.id) {
+              <div class="py-3 flex items-center justify-between text-sm">
+                <div>
+                  <div class="font-medium text-slate-800">{{ op.action }} </div>
+                  <span class="text-xs text-slate-400">Gerado: {{ op.timestamp | date:'HH:mm:ss' }}</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800': op.status === 'pending',
+                        'bg-blue-100 text-blue-800': op.status === 'processing'
+                      }">
+                  {{ op.status }}
+                </span>
+              </div>
+            }
+            @if (outbox().length === 0) {
+              <p class="text-xs text-slate-400 text-center py-4">Nenhuma transação pendente. O terminal está totalmente sincronizado.</p>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </main>
+</div>

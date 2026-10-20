@@ -1,0 +1,10 @@
+ID,Title,Severity,Priority,Confidence,Category,File,Lines,Status
+DATA-001,Falha Crítica em saveCentralState() por Inconsistência entre Coleção em Memória e Constraints SQLite,Crítica,P0,Confirmada por Teste,Persistência/Integridade,/src/server/state.ts,830-925,Validado
+FIN-002,Divergência de cálculo monetário em cancelamentos de venda,Alta,P1,Confirmada por Teste,Financeiro,/src/server/routes/sales.ts,138-145,Validado
+ARCH-003,Dependências circulares e acoplamento indevido no Sincronizador,Média,P2,Confirmada estaticamente,Arquitetura,/src/server/routes/sync.ts,650-680,Validado
+SEC-003,Vulnerabilidade de Idempotência em ordens de espaço público,Alta,P1,Confirmada por Teste,Segurança,/src/server/routes/public-space.ts,354-567,Validado
+TEN-001,Conflito de Permissão do Operador no Endpoint Direto /products,Média,P2,Confirmada estaticamente,Permissões,/src/server/routes/products.ts,7,Validado
+TEN-002,Namespace do Storage do Cliente Dividido,Alta,P1,Confirmada estaticamente,Arquitetura,/src/app/apps/pos/infrastructure/os-pos.repository.ts,15,Validado
+SYNC-001,Tratamento de erros de rede transitórios na Outbox,Média,P2,Confirmada por Teste,Sincronização,/src/app/core/sync/sync.service.ts,410-423,Validado
+OPS-001,Script de Teste no package.json Oculta a Execução dos Testes do Frontend Angular,Média,P2,Confirmada estaticamente,Operações,/package.json,10,Validado
+OPS-002,Ausência de Verificação Estrita de PAYMENT_GATEWAY_SECRET no Startup de Produção,Baixa,P3,Confirmada estaticamente,Operações,/src/server.ts,156-166,Validado

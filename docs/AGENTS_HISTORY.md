@@ -1,0 +1,577 @@
+# 3EATCRU OS - Histórico Consolidado de Fases (Fases 0 a 80)
+
+Este documento registra o histórico completo de evolução do ecossistema 3eatcru OS desde a sua concepção (Fase 0) até a consolidação dos subsistemas de telefonia, notificações e transações reativas (Fase 80).
+
+---
+
+## Fases de Evolução do Ecossistema
+
+- **Fase 0**: Definição da Arquitetura Blueprint (Criado diretório `.ai/`).
+- **Fase 1**: Refatoração da Interface do Cliente Web para Desktop OS UI (Janelas, Taskbar).
+- **Fase 2**: Implementação do Domínio Puro e Contratos (Entidades: Company, AppManifest, UseCases e Repositórios In-Memory).
+- **Fase 3**: Implementação da API Central (`server.ts` Express com `/api/v1/`) e transição do Cliente Web para Repositórios HTTP (`ApiCompanyRepository`), respeitando a regra de que o Web App não possui Sync Engine, e conversa direto com a API online.
+- **Fase 4**: Separação da Entrada Pública (Landing), Login (Access) e Setup de Empresa (Onboarding), definindo portas de acesso isoladas do Web OS, conforme a Regra de Ouro "Setup não é Login".
+- **Fase 5**: Construção do Vertical Slice de Vendas (Product/Sale Domain), adicionando Apps Nativos de "Ponto de Venda" (app_pos) e "Estoque" (app_inventory) no Window Manager integrados ao Backend Central.
+- **Fase 6**: Decomposição e modularização do Core OS, movendo as responsabilidades acumuladas na UI do desktop para subsistemas autônomos no diretório `core/`:
+  - `DeviceService`: Representação completa da identidade, registro e integridade do terminal.
+  - `HardwareService`: Abstração pura para comunicação com periféricos conectados.
+  - `PrinterService`: Fila de impressão e gerenciamento de perfis de bobinas térmicas.
+  - `ConfigurationService`: Gerenciador centralizado de chaves de configuração com escopo estruturado (GLOBAL, COMPANY, etc).
+  - `DiagnosticsService`: Motor unificado de checagem de saúde e conformidade operacional de todos os subsistemas.
+  - `UpdateService`: Gerenciador autônomo de versões do Core OS e relatórios de notas de lançamento.
+  - `Painel de Controle`: Interface visual unificada (`app_settings`) integrada ao Window Manager do desktop para gerenciar todo o ecossistema do Core OS.
+- **Fase 7**: Presença Digital & Public Space (Website Público de Clientes):
+  - Criado o App Editor de Website Público (`app_public_space` / "Presença Digital") integrado ao desktop virtual para configurar informações, cores, contatos e vitrine de produtos.
+  - Implementado o renderizador unificado (/public/:companySlug) que lê dados da Central e formata dinamicamente o site do cliente de acordo com o template escolhido (Restaurante, Varejo, Empresa).
+  - Configurado suporte para status de sincronização (Draft vs Published) gerenciados pela API Central.
+- **Fase 8**: Modernização do Desktop OS, Menu Iniciar Dinâmico e Painel de Controle Rápido (System Tray):
+  - Criado o Menu Iniciar (`isStartMenuOpen`) com pesquisa em tempo real filtrando aplicativos instalados, ferramentas de sistema e submodulos operacionais.
+  - Implementado o Painel de Controle Rápido (`isTrayOpen`) que gerencia estados de conectividade (`SyncService.isOnline`), simulação de sensores de hardware (`HardwareService` e `PrinterService`), e acionamento de diagnósticos locais (`DiagnosticsService`).
+  - Adicionado suporte a múltiplos Papéis de Parede (`wallpapers`) com atualização em tempo real do background da Área de Trabalho.
+  - Criada central de alertas e avisos via balões informativos de notificações (`notifications`), com animação fluida e auto-remoção automática, para dar feedback tátil e instantâneo a todas as ações efetuadas pelo usuário no OS.
+  - Resolução completa de problemas de acessibilidade HTML de acordo com as especificações estritas do linter Angular.
+  - **Integração Real de Apps (Vertical de Vendas)**: Conectamos o aplicativo nativo de **Ponto de Venda (`app_pos`)** ao `PrinterService` da plataforma, permitindo emissão automática de cupons fiscais térmicos formatados na finalização de cada venda, com tratamento de erros robusto se a impressora estiver offline ou sem papel.
+- **Fase 9**: Consolidação do Portal de Governança Central HQ (Backoffice SaaS):
+  - **Provisionamento Dinâmico de SaaS Tenants**: Implementado no backoffice Central HQ a criação assistida de novos espaços corporativos (Tenants), definindo saldo inicial de licença e selecionando os módulos nativos pré-instalados de partida.
+  - **Recarga de Saldos Integrada**: O Central HQ agora gerencia os créditos corporativos de cada empresa de maneira real-time, permitindo a adição de créditos com sincronismo instantâneo com a API Central.
+  - **Bloqueio/Suspensão de Terminais Remotos**: Adicionada autoridade administrativa para suspender empresas do SaaS. Caso um tenant seja marcado como `suspended`, a plataforma OS aciona uma tela vermelha de bloqueio unificado de terminal, demonstrando que o "OS não é Central" e depende dos sinais de conformidade da administração centralizada.
+  - **Resolução de Linter e Acessibilidade (A11y)**: O portal do Central HQ e o mock server foram limpos de avisos `@typescript-eslint`, tipando mapas e interfaces de telemetria, além de associar controles de formulários (A11y) conforme diretrizes estritas do linter Angular.
+- **Fase 10**: Marketplace de Descoberta Pública do Ecossistema (Central Public Space):
+  - **Experiências Públicas Distintas**: Estabelecemos a infraestrutura para duas experiências públicas harmônicas que consomem os mesmos dados: o **Business Space** (site completo e operado por cada empresa no OS) e o **Central Marketplace** (motor central do ecossistema de descoberta e busca).
+  - **Indexador Centralizado e Sandbox de Localização**: Construímos o motor de busca do Marketplace (`/marketplace`), permitindo pesquisa por palavras-chave, filtragem dinâmica por segmentos industriais (Restaurantes, Varejo, Serviços) e declaração de capacidades (Entrega, Retirada, Agendamento e Horários).
+  - **Cálculo de Distância por Georreferenciamento**: Implementamos o cálculo em tempo real de distância em KM entre os estabelecimentos cadastrados e a localização simulada do cliente (utilizando a fórmula de Haversine), demonstrando recursos avançados de geolocalização.
+  - **Alinhamento e Fluxo Seguro de Informação**: O Marketplace consome exclusivamente dados da API Central indexados dos espaços públicos, garantindo o isolamento completo de dados operacionais confidenciais do OS.
+- **Fase 11**: Portal do Desenvolvedor & Sandbox Central Interativa (Dev Hub):
+  - **Playground de APIs do Barramento**: Implementamos uma central de testes REST interativa onde desenvolvedores de terceiros e integradores de hardware podem realizar chamadas reais de API contra as rotas da Central (`/api/v1/companies`, `/api/v1/marketplace/listings` e `/api/v1/apps`) e inspecionar os retornos JSON diretamente na interface.
+  - **Simulador Físico de Webhooks**: Construímos um disparador simulado de webhook que permite aos desenvolvedores testar suas URLs de webhook informadas com payloads reais de eventos do ecossistema (como `sale.created`), registrando o tráfego em uma console monospaced customizada com controle de status e data/hora.
+  - **Acessibilidade e Tipagem Segura**: Garantimos que todos os inputs, seletores e botões do painel interativo obedeçam estritamente as diretrizes de acessibilidade (A11y) e tipagem segura do compilador Angular.
+- **Fase 12**: Auditoria, Conformidade Linter Completa e Acessibilidade (A11y):
+  - **Remoção de Tipos Genéricos (`any`)**: Auditamos e refatoramos todos os repositórios da API (`ApiProductRepository`, `ApiSaleRepository`, `ApiStoreRepository`), o barramento de configuração (`ConfigurationService`), o motor de persistência offline (`SyncService`), e o serviço de armazenamento local (`StorageService`) para usar tipagem forte com contratos dedicados e tipo `unknown`, atendendo estritamente ao linter `@typescript-eslint`.
+  - **Conformidade Completa de Acessibilidade (A11y)**: Associamos todos os rótulos `<label>` aos seus respectivos controles de formulário através de IDs dedicados e propriedades `for` no `PublicSpaceManagerComponent` e `SettingsComponent`, alcançando 100% de conformidade com as regras `@angular-eslint/template/label-has-associated-control`.
+  - **Sincronismo de Entidades de Domínio**: Alinhamos o conversor de dados do repositório HTTP de vendas para garantir mapeamento correto do status em caixa alta (`PENDING`, `COMPLETED`, `CANCELLED`) e cálculo proativo dos valores totais de itens para obedecer às especificações rígidas da entidade `Sale`.
+- **Fase 13**: Telemetria SaaS e Monitoramento de Diagnósticos Remotos (Health SaaS Tracking):
+  - **Barramento Cloud de Telemetria**: Criamos o protocolo de telemetria `/api/v1/telemetry` na Central HQ e integramos o núcleo operacional do OS (`DiagnosticsService`) para reportar automaticamente relatórios de saúde dos subsistemas (Core, Impressora, Rede, Storage) quando diagnósticos locais são acionados.
+  - **Dashboard de Saúde SaaS**: Desenvolvemos um painel unificado de monitoramento de saúde de terminais remotos na interface do Central HQ (`hq.component.html`), permitindo visualizar em tempo real o status operacional, plataforma, versão do Core e logs de diagnóstico de cada empresa no ecossistema.
+- **Fase 14**: Relatórios Consolidados de Vendas e Inteligência de Negócio no Central HQ (SaaS BI & Sales Analytics):
+  - **Histórico Real de Vendas (Ecosistema Seed)**: Semeamos dezenas de transações históricas reais distribuídas no tempo para os tenants `comp_burger` e `comp_fashion`, simulando vendas reais efetuadas nos aplicativos de Ponto de Venda (`app_pos`).
+  - **SaaS BI & Analytics Dashboard**: Desenvolvemos uma aba de Inteligência de Negócio (`analytics`) no painel do Central HQ que agrupa dinamicamente o faturamento bruto consolidado do ecossistema, quantidade de vendas e ticket médio (AOV).
+  - **Gráficos de Performance e Distribuição**: Renderizamos barras de progresso proporcionais para demonstrar a representatividade de receita de cada tenant (Burger 3eatcru vs Fashion Varejo) sobre o total geral arrecadado, além de listar o livro de transações recentes integradas em tempo real pelas APIs do barramento.
+- **Fase 15**: Motor de Faturamento Recorrente de Assinaturas SaaS (SaaS Billing Engine & Subscriptions):
+  - **Barramento Cloud de Cobrança**: Desenvolvemos o endpoint `/api/v1/companies/run-billing` que itera dinamicamente por todos os tenants cadastrados, calcula o montante mensal de custos somando os preços dos aplicativos instalados no tenant e debita diretamente do saldo de licença corporativa.
+  - **Suspensão Automática por Inadimplência**: Se o saldo de um tenant ficar negativo após o faturamento dos módulos instalados, o sistema transiciona o status do tenant de `active` para `suspended` em tempo real, acionando as proteções de bloqueio de terminal do OS.
+  - **Painel de Execução do Ciclo de Faturamento**: Criamos o simulador de cobrança no backoffice Central HQ (`hq.component.html`), exibindo o extrato detalhado de cada empresa (saldo anterior, deduções por aplicativo, novo saldo e avisos de inadimplência/suspensão).
+- **Fase 16**: Gestão de Relacionamento & Clube de Fidelidade (CRM & Loyalty Engine):
+  - **Domínio Puro de Fidelidade**: Implementamos a entidade de domínio `Customer`, com regras para cálculo de pontuação de fidelidade (1 ponto a cada R$ 10 em compras) e categorização automática por tiers (`Bronze`, `Silver`, `Gold`, `VIP`).
+  - **Barramento REST de Clientes**: Criamos endpoints na Central (`/api/v1/customers`, `/api/v1/customers/:id/points`) integrados aos contratos de repositório HTTP (`ApiCustomerRepository`) e Use Cases dedicados (`GetCustomersUseCase`, `CreateCustomerUseCase`, `AddCustomerPointsUseCase`).
+  - **Aplicativo Nativo CRM & Fidelidade (`app_crm`)**: Criamos o aplicativo para o desktop do OS com busca dinâmica de clientes, filtros por categoria/tier, cartões de clientes com histórico de compras e emissão de extrato térmico formatado via `PrinterService`.
+  - **Integração Cruzada PDV ↔ CRM**: O Ponto de Venda (`app_pos`) agora permite a seleção do cliente no fechamento do pedido, creditando pontos em tempo real no Clube de Fidelidade e imprimindo os pontos ganhos e novo saldo no cupom fiscal da venda.
+- **Fase 17**: Documentação Canônica da Central (Ecosystem & Platform Governance):
+  - **Documento Canônico de Arquitetura**: Criado `/ARCHITECTURE_CENTRAL.md` consolidando formalmente o **3EATCRU Central (HQ)** estritamente como sistema de governança de ecossistema B2B (IAM de tenants e usuários da plataforma, licenças corporativas, faturamento de módulos, telemetria de subsistemas, catálogo de apps, marketplace de descoberta e Dev Hub).
+  - **Fronteiras e Anti-Padrões**: Definidas proibições categóricas (o Central não gerencia clientes finais/consumidores de balcão, não opera caixas e não interfere na soberania operacional dos tenants).
+  - **Sincronismo Arquitetural**: Atualizados `ARCHITECTURE.md` e `/.ai/ARCHITECTURE.md` com a matriz RACI de autoridade.
+- **Fase 18**: Polimento de Multi-Tenancy Dinâmico, Troca de Workspaces e UX Operacional:
+  - **Gestor Dinâmico de Workspace no OS**: Refatoramos o `OsStateService` para suportar chaveamento dinâmico de empresas e tenants em tempo real (`switchCompany(companyId)`), desacoplando identificadores fixos e garantindo que instalações de apps e saldos ocorram no tenant ativo.
+  - **Seletor de Workspaces na Tela de Acesso**: Adicionado seletor com status de integridade (`🟢 ATIVO` vs `⛔ SUSPENSO`) e carregamento automático das credenciais do tenant selecionado na tela de login `/access`.
+  - **Troca Rápida de Workspace no Menu Iniciar do OS**: Integrado popover de troca rápida de empresa no rodapé do Menu Iniciar e na bandeja do sistema, permitindo alternar instantaneamente entre empresas clientes (`Acme Corporation`, `Burger 3eatcru`, `Fashion Varejo`, `Pet Care Clinica`) com feedback sonoro/visual via notificações de toast.
+- **Fase 19**: Módulo Nativo de Finanças, Fluxo de Caixa e Fechamento Térmico (Finance & Cash Register Engine):
+  - **Domínio Puro de Finanças**: Implementada a entidade `CashTransaction` e contrato `FinanceRepository` com validações de negócio para receitas, despesas, suprimentos (`CASH_IN`) e sangrias de segurança (`CASH_OUT`).
+  - **Application Use Cases**: Criados os casos de uso `GetTransactionsUseCase`, `CreateTransactionUseCase` e `GetCashSummaryUseCase` desacoplados da camada de visualização.
+  - **Barramento REST & Auto-Lançamento na Central**: Desenvolvidos endpoints `/api/v1/finance/transactions` e `/api/v1/finance/summary` na Central com consolidação automática de entradas no livro-caixa a cada venda concluída no PDV (`/api/v1/sales`).
+  - **Aplicativo Desktop OS (`app_finance`)**: Construída interface com KPIs de liquidez, totalizadores por meio de pagamento (Espécie, PIX, Débito, Crédito), filtros de extrato e modal para sangrias/suprimentos com atualização reativa de estado.
+  - **Fechamento de Caixa Térmico (Relatório Z)**: Integrado ao `PrinterService` para impressão automática de relatório de fechamento de turno em bobina térmica (80mm/58mm), com tratativa de erros e controle de fila de hardware.
+- **Fase 20**: Módulo Nativo de Mesas, Comandas Eletrônicas & Cozinha KDS (Food Service Dining Engine):
+  - **Domínio Puro de Mesas e Comandas**: Implementadas as entidades `DiningTable`, `TableOrder` e `TableOrderItem` com controle de estados (`AVAILABLE`, `OCCUPIED`, `BILLING`, `RESERVED`), cálculo de subtotais e divisão por pessoa.
+  - **Application Use Cases**: Criados 6 casos de uso desacoplados (`GetTablesUseCase`, `OpenTableUseCase`, `AddItemToOrderUseCase`, `UpdateOrderItemStatusUseCase`, `CloseTableUseCase`, `GetKitchenOrdersUseCase`).
+  - **Barramento REST na Central**: Criados endpoints `/api/v1/tables` para gestão de salão, comandas e integração com o fechamento de caixa (`/api/v1/finance/transactions` e `/api/v1/sales`).
+  - **Aplicativo Desktop OS (`app_tables`)**: Interface visual com visualização dual: Mapa de Salão interativo com filtros de ocupação e Display de Cozinha (KDS) em tempo real com controle de status de preparo.
+  - **Impressão Térmica de Comanda e Pré-Conta**: Integração completa com o `PrinterService` para emissão de tickets de produção na cozinha, conferência de pré-conta e cupom fiscal de encerramento.
+- **Fase 21**: Desacoplamento Arquitetural Estrito (OS Não Conhece Apps & App Runtime Baseado em Manifestos):
+  - **Contratos Puros do OS**: Criados os contratos fundamentais do ecossistema: `AppManifest` (`src/app/contracts/apps/`), `OsContext` (`src/app/contracts/os/`), e `OsDatabase` (`src/app/contracts/os/`), formalizando a interface única através da qual aplicativos operam no 3eatcru OS.
+  - **Runtime & Registro Dinâmico de Apps**: Implementados `AppRegistryService` e `AppRuntimeService` em `src/app/core/app-runtime/`. O Shell do OS (`OsShellComponent`) não possui mais dependências estáticas ou imports diretos de componentes de negócio, renderizando todas as janelas dinamicamente via `ngComponentOutlet` a partir dos manifestos registrados.
+  - **Modularização em Diretório de Apps (`src/app/apps/`)**: Cada aplicativo de negócio (`pos`, `inventory`, `crm`, `finance`, `tables`, `public-space`) agora possui seu próprio pacote autônomo com manifesto formal, isolamento de escopo e consumo desacoplado dos serviços de infraestrutura do OS (Storage com namespace, Impressão, Notificações e Navegação entre apps).
+  - **Isolamento de Storage (IndexedDB com Memory Fallback)**: Desenvolvido o `OsDatabaseService` fornecendo persistência local isolada por namespace para cada aplicativo, atendendo à conformidade de offline e multi-tenant.
+  - **Conformidade Rigorosa e Zero Erros de Linter/Build**: 100% de conformidade estrita com o linter Angular (`ng lint`) e compilação de produção (`ng build`), garantindo estabilidade e modularidade arquitetural.
+- **Fase 22**: Desktop Shortcuts Dinâmicos & Decomposição Modular de Componentes:
+  - **Atalhos Dinâmicos no Desktop (Regra #1: "OS não conhece Apps")**: Refatoração do `OsShellComponent` para renderizar atalhos da Área de Trabalho através do signal computado `installedAppShortcuts`, derivando ícones, nomes e cores diretamente dos manifestos do `AppRegistryService` e da lista de aplicativos instalados na empresa ativa, eliminando botões estáticos ou acoplados no template do OS.
+  - **Decomposição de Componentes Complexos (Regra #5)**: Decomposição completa do monolito `TablesComponent` (reduzido de 937 para ~330 linhas), dividindo-o em componentes independentes e reutilizáveis em `src/app/ui/os/apps/tables/components/`:
+    - `TableCardComponent`: Cartão de mesa individual para o Mapa de Salão com badges de status, identificação de garçom e cálculo de consumo per capita.
+    - `KdsDisplayComponent`: Display da Cozinha (KDS) em tempo real com controle de status de preparo de pratos e emissão de ticket térmico.
+    - `TableOpenModalComponent`: Modal de abertura de nova mesa com contagem de clientes e garçom responsável.
+    - `TableOrderModalComponent`: Modal de comanda eletrônica com lançamento rápido de itens, observações e emissão de pré-conta.
+    - `TableCheckoutModalComponent`: Modal de recebimento e encerramento de conta com seletor de pagamento e fechamento financeiro.
+  - **Testes Incrementais e Estabilidade (Regra #4)**: Execução de validação de linter (`ng lint`) e compilação de produção (`ng build`) a cada etapa da refatoração, mantendo 100% de conformidade estrita e zero erros.
+- **Fase 23**: Desacoplamento do Central HQ e Purificação de Domínios de Negócio do Core:
+  - **Desacoplamento do Central HQ (Regra #2: "OS não é Central HQ")**: Refatorado `HqComponent` para eliminar qualquer dependência direta do runtime do cliente do sistema operacional (`OsStateService`). O painel do Central HQ agora consulta de forma soberana a API canônica do ecossistema (`/api/v1/apps`), garantindo estrita separação de autoridade entre a Central (HQ) e os clientes OS.
+  - **Purificação do Core do OS (Regra #1 e #3: "OS não conhece Apps" & "App depende do OS")**: Remoção integral de todas as entidades de negócio legadas (`customer`, `finance`, `product`, `sale`, `tables`), casos de uso de negócio e repositórios de negócio de dentro de `src/app/core/`. A pasta `core/` agora permanece exclusivamente reservada para subsistemas essenciais de plataforma e sistema operacional.
+  - **Migração Completa dos Aplicativos para seus Módulos Autônomos**: Todos os componentes de interface (`pos`, `inventory`, `crm`, `finance`, `tables` e seus submódulos) agora consomem diretamente a lógica, contratos e serviços de seus respectivos pacotes em `src/app/apps/`.
+  - **Tipagem Segura e Conformidade Total**: Eliminação de tipos `any`, compatibilidade com flags rígidas de compilação TypeScript (`isolatedModules`), zero erros de compilação em produção e 100% de aprovação no linter (`ng lint`).
+- **Fase 24**: Estabelecimento da Arquitetura Dual-OS (HQ OS vs Client OS):
+  - **Refinamento Arquitetural**: O ecossistema foi redefinido para operar com dois sistemas operacionais distintos: o **3EATCRU HQ OS (Control Plane)**, que atua como um sistema operacional administrativo próprio (gerindo tenants, billing, licenças, catálogo de apps), e o **3EATCRU OS (Client/Runtime Plane)**, focado exclusivamente na operação do cliente final (PDV, CRM, offline-first).
+  - **Independência Operacional**: O Client OS garante operação local sem dependência contínua do HQ OS, assegurando que operações no PDV/Restaurante prossigam mesmo se o painel administrativo/HQ ficar offline.
+  - **Atualização de Documentos Core**: Atualização formal do `.ai/ARCHITECTURE.md`, `ARCHITECTURE.md` e `ARCHITECTURE_CENTRAL.md` clarificando a visão de `HQ OS` como uma plataforma com kernel/shell próprios gerindo o ecossistema SaaS, distanciando-o do conceito de um mero dashboard ou aba adicional.
+- **Fase 25**: Clarificação da Hospedagem Unificada vs. Autoridade (Single Server, Múltiplos Planos Lógicos):
+  - **Servidor Único**: Esclarecida a premissa de que *estar hospedado no mesmo servidor não significa pertencer ao HQ OS*. O servidor (Node.js/Express) atua como um grande container que provê infraestrutura para o HQ OS, o App Runtime (Web OS), o Marketplace e o Public Space simultaneamente.
+  - **Plano de Execução Web**: Formalizado que o **3eatcru OS** mantém contratos estritos de aplicativos que podem rodar perfeitamente em dois ambientes físicos: **Nativo (Windows/Android)** via Sync Engine + Hardware local, e **Web (Navegador)** conectados direto ao servidor e suas APIs centrais. Ambos operam no mesmo ecosistema mas com fronteiras lógicas inquebráveis.
+  - **Documentação de Blueprint**: Refinamento dos artefatos `ARCHITECTURE.md` e `.ai/ARCHITECTURE.md` para desenhar explicitamente a segregação de planos e runtimes a partir do mesmo Servidor hospedeiro.
+- **Fase 26**: Estabilização Completa do Build, Tipagem Forte e Conformidade com Linter (Zero Warnings/Zero Errors):
+  - **Saneamento do Storage & Repositórios**: Refatoração dos repositórios nativos e web do `OsDatabase` (`OsCustomerRepository`, `OsFinanceRepository`, `OsProductRepository`, `OsSaleRepository`, `OsTableRepository`) garantindo tipos estritos para consultas indexadas (`{ key: string; value: T }[]`), eliminando tipos `any` e implementando suporte a paginação (`limit`, `offset`) no `NativeDatabaseAdapter`.
+  - **Remoção de Injeções e Imports Não Utilizados**: Limpeza e refatoração do `HqStateService` e `HqBillingComponent` para adoção da função canônica `inject()`, remoção de dependências mortas e tipagem segura com validação nula na resposta de endpoints de faturamento (`/api/v1/companies/run-billing`).
+  - **Acessibilidade Completa (A11y) no HQ OS**: Associação estrita de todos os elementos `<label for="...">` com os seus respectivos controles de formulário `<input id="...">`, `<select id="...">` e `<textarea id="...">` nos componentes do HQ OS (`CatalogComponent`, `DevHubComponent`, `TenantsComponent`), além da substituição de tags `ngClass` por `class bindings`.
+  - **Homologação Estrita (Regras de Ouro #4 e #6)**: 100% de sucesso verificado em `ng lint` (zero erros) e `ng build` (compilação de produção perfeita), garantindo estabilidade e integridade em todo o ecossistema.
+- **Fase 27**: Adoção do 3EATCRU MASTER ARCHITECTURE (Versão 2.0 - Platform First · Apps Second):
+  - **Canonicidade Arquitetural**: Integração formal do documento-mestre `3EATCRU MASTER ARCHITECTURE` (Versão 2.0) em `/ARCHITECTURE.md` e sincronismo dos blueprints em `/.ai/ARCHITECTURE.md`.
+  - **Alinhamento do AppManifest (Seção 7.1)**: Expansão do contrato `AppManifest` para incluir suporte formal aos atributos canônicos: `publisher`, `capabilities`, `dependencies`, `osCompatibility`, `dataNamespace`, `syncPolicy` (`append-only` | `last-write-wins` | `crdt` | `per-entity`), `settingsSchema` e `signature`.
+  - **Alinhamento do Local-First & Sync (Seção 10)**: Evolução do `SyncService` e `OutboxOperation` para incluir `idempotencyKey` estável por operação, transição de estado com confirmação explícita (`ACK`) via status `acknowledged`, e retenção transacional segura em banco persistente.
+  - **Validação das 6 Regras de Ouro**: Conformidade rigorosa com a independência do Core (OS não conhece Apps), separação Dual-OS (OS não é HQ), dependência invertida (App depende do OS), testes e verificações estritas entre etapas (build e lint limpos).
+- **Fase 28**: Execução da FASE A — FUNDAÇÃO (Master Architecture Blueprint):
+  - **Árvore Canônica de Contratos do OS (Seção 8.1)**: Criados os módulos canônicos em `src/app/contracts/`:
+    - `storage/` (`IStorage`, `ITransaction`, `IMigration`, `IQueryOptions`, `IStorageNamespace`).
+    - `network/` (`INetwork`, `IHttpClient`, `IConnectivityMonitor`, `NetworkStatus`).
+    - `auth/` (`IIdentity`, `ISession`, `ITenantContext`, `IPermission`).
+    - `events/` (`IEventBus`, `IEventSubscription`, `IEventLog`, `OsEvent`).
+    - `device/` (`IDevice`, `IPeripheral`, `IDeviceIdentity`).
+    - `printing/` (`IPrintQueue`, `IPrintJob`, `IPrintAdapter`).
+    - `sync/` (`IOutbox`, `ISyncEngine`, `IConflictResolver`, `IReconciler`).
+    - `diagnostics/` (`IHealthCheck`, `IMetrics`, `ILogger`).
+    - `updates/` (`IUpdateManager`, `ICompatibilityResolver`).
+  - **Barramento Reativo de Eventos do Kernel (`OsEventBusService`)**: Implementação do barramento desacoplado para comunicação pub/sub entre Kernel, Shell e Apps sem acoplamento direto.
+  - **Gerenciamento de Ciclo de Vida do App Runtime (`AppRuntimeService` & `WindowManagerService`)**:
+    - Suporte formal aos estados de ciclo de vida (`AppLifecycleState`: `unmounted`, `initializing`, `active`, `paused`, `destroyed`).
+    - Rastreabilidade de instâncias ativas (`RunningAppInstance`).
+    - Sincronização automática dos eventos de ciclo de vida através do `WindowManagerService` ao abrir (`active`), focar (`active`), minimizar (`paused`) ou fechar janelas (`destroyed`).
+  - **Homologação Estrita (Regras #4 e #6)**: 100% verificado em `ng lint` (zero erros) e `ng build` (compilação de produção bem-sucedida).
+- **Fase 29**: Execução da FASE B — INFRAESTRUTURA (Master Architecture Blueprint):
+  - **Motor de Migrações Versionado (`MigrationEngineService`)**:
+    - Implementação de `MigrationEngineService` em `src/app/core/storage/migration/` com journal transacional persistente no namespace `system.migrations`.
+    - Execução sequencial ordenada de migrações (`up`) e controle transacional por namespace.
+  - **Sync Outbox com Idempotência e Exponential Backoff**:
+    - Implementação de `ISyncEngine` no `SyncService` com cálculo de retentativa exponencial (`Math.min(1000 * 2^retry, 30000)`), timestamp de próximo retry (`nextRetryAt`) e retenção transacional de erros.
+  - **Resolução de Conflitos (`ConflictResolverService`)**:
+    - Criação do serviço `ConflictResolverService` implementando `IConflictResolver` com suporte às 3 estratégias fundamentais: `append-only` (coleções e logs auditáveis), `last-write-wins` (baseado em número de versão e timestamp de atualização) e `crdt` básico (LWW-Element-Set para merge inteligente de campos).
+  - **Identidade de Hardware e Fingerprint (`DeviceService`)**:
+    - Implementação formal do contrato `IDevice` com geração de hardware fingerprinting hash determinístico e token JWT local para autenticação soberana do terminal.
+  - **Simulador de Periféricos e Drivers (`HardwareService`)**:
+    - Mock e abstração unificada para impressora térmica ESC/POS, leitor de código de barras, gaveta automática de dinheiro com disparo elétrico, balança digital com leitura estabilizada de peso e display de cliente LCD 2x20 VFD.
+  - **Spooler e Templates de Impressão Comercial (`PrinterService`)**:
+    - Implementação formal de `IPrintQueue` no `PrinterService` com fila assíncrona, templates paramétricos para bobinas de `80mm`, `58mm` e `A4`, cancelamento, retentativa e mecanismo de fallback automático para Spooler Virtual quando a impressora física estiver sem papel ou offline.
+  - **Diagnósticos, Métricas e Logs Estruturados (`DiagnosticsService`)**:
+    - Implementação formal de `IHealthCheck`, `IMetrics` e `ILogger` no `DiagnosticsService`, registrando latências de barramento, contadores operacionais e histórico de logs em memória com telemetria automática despachada para a Central HQ.
+  - **Gestão de Versões e Compatibilidade Semver (`UpdateService`)**:
+    - Implementação formal de `IUpdateManager` e `ICompatibilityResolver` no `UpdateService` com verificação de semver e validação de compatibilidade entre versão mínima requerida do OS e apps instalados.
+  - **Homologação Estrita (Regras #4 e #6)**: 100% de aprovação no linter (`ng lint` com zero problemas) e compilação de produção (`ng build` concluído com sucesso).
+- **Fase 30**: Execução da FASE C — PRIMEIRO APP (POS construído sobre SDK/Contratos do OS):
+  - **Criação do SDK Canônico (`OsSdkService`)**: Criado o pacote `src/app/sdk/` disponibilizando o `OsSdkService` como ponto de entrada canônico e seguro para qualquer aplicativo se acoplar ao OS via `osSdk.bind(appId)`.
+  - **Refatoração Completa do App POS (`app_pos`)**: Eliminação de quaisquer injeções diretas de serviços internos do sistema (`PrinterService`, `HardwareService`, `OsStateService`). O POS agora opera 100% sobre o `OsContext` fornecido pelo SDK.
+  - **Decomposição Modular do POS (Regra #5)**: Quebra do componente monolítico em submódulos desacoplados:
+    - `PosProductGridComponent`: Grade de produtos com busca, filtro por categorias e cards táteis com indicação de estoque.
+    - `PosCartComponent`: Carrinho de compras com controles de quantidade, seletor de cliente/fidelidade, formas de pagamento, acionamento elétrico de gaveta e leitura de balança.
+    - `PosComponent`: Orquestrador de fluxo utilizando use cases desacoplados e o `OsSdkService`.
+  - **Comunicação com Periféricos via SDK**: Impressão automática de cupom fiscal térmico, acionamento de gaveta de dinheiro (RJ12) em pagamentos em espécie e atualização do display de cliente (VFD) exclusivamente através das chamadas de contexto `app.print(...)` e `app.hardware.*`.
+  - **Persistência e Sincronização Desacopladas**: O repositório `OsSaleRepository` e `OsProductRepository` agora utilizam o namespace de storage do app via SDK (`app.storage`), despacham operações para a fila do `app.sync` e publicam eventos desacoplados no `app.events` (`sale.completed`).
+- **Fase 31**: Execução da FASE D — SEGUNDO APP (Inventory provando que não exige mudanças no Core):
+  - **Independência Estrita do Core (Regra #1 e #2)**: O aplicativo de Estoque e Suprimentos (`app_inventory`) foi construído de ponta a ponta sem exigir NENHUMA alteração no `core/` do OS. O Platform Core permaneceu 100% intacto, comprovando na prática o princípio "Platform First · Apps Second".
+  - **Domínio Puro e Repositório Isolado**: Implementadas as entidades de domínio `InventoryItem` e `StockMovement`, use cases desacoplados (`GetInventoryItemsUseCase`, `AdjustStockUseCase`) e repositório `OsInventoryRepository` operando no namespace do app via `OsSdkService`.
+  - **Decomposição Modular do Estoque (Regra #5)**:
+    - `InventoryTableComponent`: Tabela interativa com busca em tempo real por SKU/Nome, filtros de estoque crítico/normal e badges visuais.
+    - `InventoryAdjustModalComponent`: Modal de movimentação de estoque (Entrada/Saída) com cálculo projetado e justificativa para trilha de auditoria.
+    - `InventoryComponent`: Painel com métricas de KPI em tempo real (Total de Itens, Reposições Urgentes, Custo Total e Potencial de Venda).
+  - **Homologação Estrita (Regras #4 e #6)**: 100% de conformidade com `ng lint` (zero erros) e compilação de produção (`ng build` bem-sucedida).
+- **Fase 32**: Execução da FASE E — HQ OS / CONTROL PLANE (Gestão de Tenants, Planos, Ledger, Identidade e OTA Rollouts):
+  - **Dual-OS Separation (Regra #2: OS não é HQ)**: O HQ OS opera de forma estritamente isolada do Client OS, administrando a governança B2B de tenants, limites de terminais, livro-razão financeiro, catálogo e canais de atualização OTA.
+  - **Barramento Cloud de Governança na Central (`server.ts`)**:
+    - Implementados endpoints de planos canônicos e quotas (`/api/v1/licensing/plans`).
+    - Livro-razão e auditoria financeira de tenants (`/api/v1/companies/:id/ledger` e `/adjust-balance`).
+    - Gestão de usuários de terminal do Client OS (`/api/v1/companies/:id/users`).
+    - Distribuição e canais de release OTA do Core OS (`/api/v1/distribution/os-releases`, `/rollout-os`, `/rollback-os`).
+  - **Expansão de Domínio & Repositório (`Company` & `ApiCompanyRepository`)**:
+    - Adicionados campos estruturais à entidade `Company`: `plan`, `maxTerminals`, `activeTerminals`, `channel`, `osTargetVersion` e `licenseExpiresAt`.
+  - **Decomposição Modular do HQ Tenants (Regra #5)**:
+    - `TenantCardComponent`: Card individual com status, plano, limite de terminais, versão do Core OS e ações rápidas.
+    - `TenantProvisionModalComponent`: Provisionamento guiado de novo tenant com definição de plano, saldo e terminais.
+    - `TenantCreditModalComponent`: Aporte de créditos corporativos com registro obrigatório de justificativa para auditoria.
+    - `TenantUsersModalComponent`: Gestão de operadores/usuários do Client OS do tenant com papéis (operador, gerente, admin).
+    - `TenantStatusModalComponent`: Suspensão e reativação remota de tenants.
+  - **Evolução do HQ Billing & Livro-Razão**:
+    - `PlansCatalogComponent`: Visualização dos planos canônicos (Starter, Pro, Enterprise), cotas de terminais e pacotes de módulos.
+    - `LedgerTableComponent`: Extrato de auditoria em tempo real do livro-razão (aportes de crédito, débitos de módulos e taxas de plano).
+  - **Distribuição OTA & Rollback de Emergência no Dev Hub**:
+    - `OsReleasesManagerComponent`: Gestão de releases de sistema operacional, changelogs, rollout seletivo por tenant/canal e botão de rollback de emergência para a versão LTS (`1.1.0-lts`).
+  - **Homologação Estrita (Regras #4 e #6)**: 100% de conformidade verificada com `ng lint` (zero avisos/erros) e compilação de produção (`ng build`).
+- **Fase 33**: Modularização do Marketplace do Ecossistema (Public Space Discovery):
+  - **Decomposição Modular (Regra #5)**: Decomposto o explorador de marketplace (`/marketplace`) em subcomponentes autônomos:
+    - `MarketplaceFiltersComponent`: Filtros de capacidades (Delivery, Retirada, Agendamento) e simulação de geolocalização com slider de raio em km.
+    - `MarketplaceSearchHeaderComponent`: Barra de busca textual, seletores de categoria e ordenação dinâmica.
+    - `MarketplaceListingCardComponent`: Card de listagem comercial com badges de capacidades, cálculo dinâmico de distância via fórmula de Haversine e link para o Business Space.
+  - **Estabilidade & Homologação**: Ajuste de tipagem dos contratos de coordenadas geográficas e restauração do servidor de desenvolvimento em estado 100% operacional (`ng lint` e `ng build` limpos).
+- **Fase 34**: Modularização da Presença Digital Pública (Business Space Renderer):
+  - **Decomposição Modular de Templates (Regra #5)**: O renderizador `/public/:companySlug` foi decomposto em componentes especializados com responsabilidade única:
+    - `RestaurantTemplateComponent`: Template gastronômico com hero temático, história e cardápio de especialidades com precificação.
+    - `RetailTemplateComponent`: Vitrine comercial de lançamentos e produtos em destaque com badges de disponibilidade.
+    - `BusinessTemplateComponent`: Landing page corporativa com portfólio de serviços e canais de contato com especialistas.
+    - `PublicSpaceFooterComponent`: Rodapé unificado com detalhes de contato, horário operacional em tempo real e geolocalização.
+  - **Homologação Estrita (Regras #4 e #6)**: 100% de conformidade com o linter Angular (`ng lint`) e compilação de produção (`ng build`).
+- **Fase 35**: Preparação do Ecossistema & Runtime para Apps de Integração de Mercado (WhatsApp, Telegram, iFood):
+  - **Expansão de Categorias e Manifestos (Regra #1: "OS não conhece Apps")**: Adicionadas categorias canônicas `INTEGRATION`, `DELIVERY` e `MESSAGING` ao contrato `AppManifest`.
+  - **Aplicativos de Mercado Autônomos (`src/app/apps/`)**:
+    - **WhatsApp Business Hub (`app_whatsapp`)**: Conector com status de sessão/QR Code, gatilhos de mensagens automáticas (comprovante digital, pontos fidelidade, pedido pronto, saída para entrega) e fila de logs em tempo real. Decomposto em `WhatsappQrConnectComponent`, `WhatsappTemplateConfigComponent` e `WhatsappMessageLogsComponent`.
+    - **Telegram Manager Bot (`app_telegram`)**: Robô de alertas executivos para gestores com monitoramento de sangrias de caixa (`CASH_OUT`), fechamento de turno Z e avisos de estoque crítico. Decomposto em `TelegramBotConfigComponent` e `TelegramAlertFeedComponent`.
+    - **iFood Delivery Hub (`app_ifood`)**: Recepção em tempo real de pedidos de delivery externo com controle de loja aberta/pausada, confirmação com impressão automática de comanda térmica para a cozinha e sincronismo de entrega. Decomposto em `IfoodStoreStatusComponent` e `IfoodOrdersFeedComponent`.
+  - **Consumo Exclusivo via SDK e Contexto do OS (Regra #3: "App depende do OS")**: Todos os novos aplicativos de mercado conectam-se ao sistema via `OsSdkService.bind()`, utilizando o `OsContext` para emissão de impressões, envio de notificações e isolamento de escopo.
+  - **Catálogo Global da Central & Injeção Dinâmica**: Novos apps cadastrados no endpoint da API Central (`/api/v1/apps`), registrados no token `OS_APPS` e disponibilizados para os tenants do ecossistema.
+  - **Homologação e Conformidade Total (Regras #4 e #6)**: 100% aprovado no `ng lint` e compilação de produção (`ng build`).
+- **Fase 36**: Consolidação do Kernel — Identidade Real (JWT/Sessão), Isolamento de Operadores e Motor de Permissões no Runtime:
+  - **Identidade e Autenticação Real (`IdentityService` & `authInterceptor`)**:
+    - Criados os contratos formais de autenticação em `src/app/contracts/auth/auth.contract.ts` (`LoginCredentials`, `LoginResponse`, `HqLoginCredentials`, `HqLoginResponse`, `UserRole`, `ISession`, `IIdentity`).
+    - Implementado `IdentityService` em `src/app/core/identity/` gerenciando sessões ativas persistentes (`3eatcru_client_session_v1` e `3eatcru_hq_session_v1`) com tokens JWT criptografados e reatividade via signals Angular.
+    - Implementado `authInterceptor` para injeção automática do cabeçalho `Authorization: Bearer <token>` em todas as requisições HTTP da aplicação.
+  - **Endpoints de Autenticação Segura na Central (`server.ts`)**:
+    - Implementadas rotas reais `/api/v1/auth/login`, `/api/v1/auth/hq-login` e `/api/v1/auth/me` com validação de credenciais (e-mail + PIN para operadores de tenant; e-mail + senha para administradores HQ) e assinatura/verificação de tokens HMAC-SHA256.
+    - O login no `AccessComponent` e no `HqOsShellComponent` agora autentica operadores e administradores contra a Central com tratamento de erros (senha incorreta, tenant suspenso).
+  - **Motor de Verificação de Permissões no Runtime (`AppRuntimeService`)**:
+    - Implementado o método `checkPermission` no `AppRuntimeService` validando se o manifesto do aplicativo declara expressamente permissões para recursos sensíveis (`printer`, `hardware`, `notifications`, `storage`) antes de autorizar a execução pelo `OsContext`.
+    - Alertas de violação de permissão são registrados no `DiagnosticsService` e feedback tátil é emitido ao usuário caso um aplicativo tente acessar periféricos sem autorização.
+  - **Homologação Estrita (Regras #4 e #6)**: 100% de conformidade com o linter Angular (`ng lint` sem erros) e compilação de produção (`ng build` concluído com sucesso).
+- **Fase 37**: Consolidação do Kernel — Sincronismo Real (Idempotência & ACKs), Transações Atômicas com Rollback e Validação de Compatibilidade de OS:
+  - **Motor de Sincronização em Lote Real (`SyncService` & Central `/api/v1/sync/batch`)**:
+    - Substituída a simulação de tempo (`setTimeout`) pelo envio HTTP de lote para o endpoint `/api/v1/sync/batch`.
+    - Implementada checagem de idempotência com chave `idempotencyKey` no servidor, evitando duplicação acidental de transações financeiras, vendas e ajustes de estoque.
+    - Processamento de confirmações explícitas (ACKs) com remoção da fila Outbox local e algoritmo de retentativa com recuo exponencial (*exponential backoff*) em caso de falha.
+    - Sincronização automática em segundo plano quando conectado à internet, eliminando perda de dados.
+  - **Isolamento Transacional e Rollback Atômico (`NativeDatabaseAdapter` & `WebDatabaseAdapter`)**:
+    - Implementado buffer transacional de staging (`stagedPuts` e `stagedDeletes`) com leitura em camadas no método `transaction()`.
+    - Garantia de atomicidade: se o callback da transação for bem-sucedido, todos os registros são comitados em lote; se o callback lançar qualquer erro, todos os dados pendentes são descartados (Rollback imediato), preservando a integridade do banco de dados local.
+  - **Validação de Compatibilidade e Dependências de Aplicativos (`AppRuntimeService`)**:
+    - Implementado `validateAppCompatibility` que verifica se a versão do OS do dispositivo atende à regra de `osCompatibility` do manifesto do aplicativo e se todas as dependências declaradas em `dependencies` estão registradas no `AppRegistryService`.
+    - Integração no `createContext` emitindo alertas imediatos no `DiagnosticsService` em caso de incompatibilidade.
+  - **Homologação Estrita (Regras #4 e #6)**: 100% de conformidade verificada com `ng lint` (zero avisos) e compilação de produção (`ng build`).
+- **Fase 38**: Consolidação e Finalização do HQ Central & HQ OS (Control Plane Platform):
+  - **Experiência de Shell do HQ OS**: Shell administrativo com dock de navegação estruturada por pilares (Governança SaaS, Ecossistema de Módulos, Infraestrutura & Diagnósticos, e Acesso Rápido aos outros planos do ecossistema como Client OS e Marketplace Público).
+  - **Barramento de Notificações & Auditoria em Tempo Real**: Implementada gaveta retrátil (*Slide-over Activity Drawer*) no cabeçalho do HQ OS com log de eventos de auditoria em tempo real, contador de badges dinâmico, relógio de precisão UTC/local e indicador de integridade da Central.
+  - **Módulos do Control Plane Totalmente Integrados**:
+    - `Dashboard BI`: Consolidação de faturamento global, volume de vendas, ticket médio (AOV), representatividade de receita por tenant e lista de transações recentes.
+    - `Gestão de Tenants`: Provisionamento de novos tenants, gestão de licenças, injeção de saldo/créditos, gerenciamento de usuários corporativos e suspensão/bloqueio remoto de terminais.
+    - `Billing & Ledger`: Execução idempotente do ciclo de faturamento mensal com recálculo automático com base nos apps instalados e extrato financeiro por empresa.
+    - `Catálogo de Módulos`: Gestão do ciclo de vida dos aplicativos da plataforma, precificação e visibilidade no marketplace.
+    - `Developer Hub & OTA`: Distribuição de releases do OS para atualização de clientes e sandbox interativa de APIs e webhooks.
+    - `Telemetria & Logs`: Monitoramento de saúde dos nós do ecossistema (Core, Impressora, Rede, Storage e Memória).
+  - **Homologação e Conformidade (Regras #4 e #6)**: 100% de aprovação no linter (`ng lint`) e compilação de produção (`ng build`).
+- **Fase 39**: Experiência do Usuário (UX/UI Polish), Gerenciamento Avançado de Janelas e Telas Dinâmicas no 3EATCRU OS:
+  - **Gerenciamento Avançado de Janelas (`WindowManagerService`)**:
+    - Imposição de suporte completo a maximização e restauração de janelas (`isMaximized`, `toggleMaximize`).
+    - Controles nativos na barra de título (Minimizar, Maximizar/Restaurar, Fechar) com interações fluidas e proteção contra propagação de eventos.
+    - Integração de toggle dinâmico na barra de tarefas (`taskbar`), permitindo alternar entre focar, restaurar e minimizar aplicações ativas com feedback visual de estado.
+  - **Refinamento Visual da App Store (`StoreComponent`)**:
+    - Adicionada barra de busca em tempo real com filtro reativo por nome, desenvolvedor e descrição.
+    - Banner imersivo com gradiente de alta fidelidade e exibição em tempo real do saldo corporativo da empresa ativa.
+    - Cards de aplicativos estilizados com badges de preço/gratuidade, indicação de assinatura pelo Core OS e feedback tátil de instalação em andamento.
+  - **Refinamento Visual de Meus Aplicativos (`InstalledAppsComponent`)**:
+    - Busca e filtragem instantânea de aplicativos instalados no terminal.
+    - Status de integridade do runtime e execução direta através do botão "Executar" conectado ao `WindowManagerService`.
+  - **Experiência de Acesso e Login Rápido (`AccessComponent`)**:
+    - Chips interativos de seleção rápida de empresas de demonstração (Acme, Burger 3eatcru, Fashion Varejo, Pet Care) com alternância instantânea de credenciais e indicadores de status (Ativo vs Suspenso).
+    - Design sofisticado com fundo radial, blur de alta performance e atalho direto para a Central HQ.
+  - **Homologação e Conformidade Estrita (Regras #4 e #6)**: 100% de conformidade com `ng lint` (zero avisos ou erros) e compilação de produção (`ng build` concluído com sucesso).
+- **Fase 40**: Refinamento da Porta de Entrada e Provisionamento Guiado (Landing & Onboarding Portals):
+  - **Portal de Apresentação & Gateways (`LandingComponent`)**:
+    - Layout imersivo com gradiente radial de alta fidelidade e cartões de acesso desacoplados para os 3 planos do ecossistema: *Marketplace Público*, *3EATCRU Client OS* e *HQ Central & Control*.
+    - Barra de navegação com identificação de versão da plataforma e atalhos contextuais.
+  - **Setup e Provisionamento Autêntico de Empresas (`OnboardingComponent`)**:
+    - Conexão do formulário de setup à API da Central (`POST /api/v1/companies`), realizando o provisionamento dinâmico do novo tenant corporativo com saldo de licença e módulos nativos de partida.
+    - Troca automática e segura de contexto de workspace no OS via `OsStateService.switchCompany()` com redirecionamento imediato para o Desktop OS.
+  - **Homologação e Conformidade Estrita (Regras #4 e #6)**: 100% de conformidade com `ng lint` (zero erros) e compilação de produção (`ng build` concluído com sucesso).
+- **Fase 41**: Isolamento Estrito de Tenants e Blindagem do Protocolo de Sincronismo (Tenant Isolation & Sync Hardening):
+  - **Blindagem do Protocolo de Sincronismo (`/sync/batch`)**:
+    - Imposição do contexto de `companyId` do token JWT assinado para todas as operações em lote processadas no barramento, impedindo que requisições falsificadas alterem dados de outros tenants.
+    - Implementação de tratamento transacional atômico individualizado por operação com tratamento robusto de erros e integridade reativa.
+  - **Blindagem e Sandbox contra IDOR em Todas as APIs**:
+    - Injeção sistemática do middleware `requireTenant` nos endpoints de Produtos, Vendas, Clientes/CRM, Transações Financeiras, Resumos de Caixa, Mesas de Salão e Comandas do KDS.
+    - Determinação dinâmica do escopo de empresa: as requisições herdam automaticamente o `companyId` do token verificado (exceto para `hq_admin`), prevenindo vazamento cruzado de informações (*IDOR prevention*).
+    - Sandbox do banco Key-Value `/api/v1/os-db` garantindo que chaves escritas ou lidas por clientes herdem um prefixo inalterável do tenant (`req.user.companyId`).
+  - **Tipagem Segura e Conformidade Linter Total (Zero Errors/Warnings)**:
+    - Resolução completa de avisos do `@typescript-eslint` em arquivos do backend e frontend, substituindo tipos genéricos, garantindo tipagem forte e 100% de sucesso nas checagens (`ng lint` e `ng build` limpos).
+- **Fase 42**: Expurgamento de Diálogos Síncronos e Polimento das Notificações do Core (UI/UX Polish & Toast Integration):
+  - **Remoção de Bloqueios Síncronos (`alert`)**:
+    - Substituição sistemática de chamadas de `window.alert` e `alert` síncronas por disparadores reativos integrados à central de notificações do Shell através do canal `onNotification` do `AppRuntimeService` em todos os fluxos do Painel de Controle (`SettingsComponent`).
+    - Prevenção ativa de interrupções de fluxo de execução no ambiente sandbox do iFrame, alinhada às melhores práticas de usabilidade e restrições de iFrame do Google AI Studio.
+  - **Experiência Visual Coesa**:
+    - Integração de feeds de retorno instantâneo (toasts) categorizados com precisão (`success`, `info`, `warning`, `error`) no spooler de impressão de teste, verificação e instalação de atualizações do OS, e barramento de sincronismo manual de dados.
+  - **Conformidade de Linter e Build de Produção**:
+    - Verificação estrita com `ng lint` e `ng build` comprovando 100% de estabilidade estrutural e conformidade com as Regras de Ouro.
+- **Fase 43**: Expansão do SaaS BI & BI Dashboard de Auditoria e Segurança no HQ Central OS:
+  - **SaaS BI Analytics Expandido**: Implementado o painel "Retenção & LTV de Tenants (B2B)" com novos indicadores B2B de Churn Rate de Tenants da plataforma, Taxa de Retenção consolidada de Empresas e projeção estimada de LTV (Customer Lifetime Value) médio do Tenant no `HqDashboardComponent`.
+  - **Projeções de Crescimento de Receita**: Adicionado o simulador de projeções recorrentes calculando em tempo real o ARR Anualizado Atual e as estimativas de receita recorrente mensal (MRR) para 6 e 12 meses com base em taxa de crescimento mensal acumulada de 5% MoM.
+  - **Blindagem e Autenticação de Tenants**: Enrijecimento das regras de segurança no Express middleware `requireTenant` com checagem em tempo real de status de ativação/suspensão (suspensão imediata se inadimplente em qualquer requisição de API do terminal) e prevenção estrita de IDOR garantindo que o `companyId` no body corresponda ao token autenticado.
+- **Fase 44**: Suporte Nativo a Multi-Filiais (Multifiliais / Multi-branch Support):
+  - **Identidade e Sessão Ampliadas**: Expansão dos contratos em `auth.contract.ts` (`ITenantContext` e `LoginCredentials`) para comportar contextualmente os atributos `branchId` e `branchName`.
+  - **Semente do Banco de Dados Centralizada**: Atualização no barramento Express (`server.ts`) para incluir filiais estruturadas (`BranchData`) simulando unidades operacionais reais para todos os tenants da plataforma.
+  - **Endpoints Multi-Filial**: Desenvolvimento de endpoint central `/api/v1/companies/:companyId/branches` e fortalecimento do login `/auth/login` validando e assinando o JWT com as chaves contextuais da filial selecionada.
+  - **Seletor de Filiais no Login**: Atualização visual e lógica do `AccessComponent` para obter reativamente as filiais da empresa em foco, disponibilizando um seletor unificado e fortemente tipado com `BranchOption` (substituindo tipos `any[]` em conformidade com o linter).
+  - **Display Dinâmico de Unidade no OS Shell**: Integração do `IdentityService` no Shell do desktop (`OsShellComponent`) para expor a filial autenticada no rodapé do Menu Iniciar e na bandeja do sistema (System Tray), preparando os aplicativos para isolamento de filiais.
+  - **Homologação Estrita**: 100% verificado com `ng lint` (zero avisos) e compilação de produção (`ng build` com sucesso absoluto).
+- **Fase 45**: Integração da Sessão Multi-Filial ao SDK e Aplicativos de Negócio (OS SDK & App Branch Context integration):
+  - **Fronteira e Contratos de Contexto**: Atualização do contrato `OsContext` em `os-context.contract.ts` introduzindo os atributos opcionais `branchId` e `branchName` para que qualquer aplicativo operacional possa acessar a filial logada sem consultar recursos internos do sistema.
+  - **Adaptação no App Runtime**: Atualização da engine `AppRuntimeService` para receber os identificadores da unidade ativa na assinatura de `createContext()` e mapeá-los de forma reativa.
+  - **Vínculo pelo SDK Canônico**: Refatoração do SDK de acesso unificado (`OsSdkService`) injetando o `IdentityService` para resolver de forma transparente a filial autenticada na sessão do tenant e alimentar o objeto de contexto no momento do `bind(appId)`.
+  - **Adoção Prática no POS (Ponto de Venda)**: Atualização da barra de cabeçalho do aplicativo nativo de PDV (`app_pos` / `PosComponent`) para apresentar dinamicamente a filial operacional ao lado do nome da empresa de forma polida e responsiva.
+  - **Conformidade Estrita e Zero Erros**: Homologação completa com `ng lint` e verificação com build de produção (`ng build`) assegurando que a plataforma permaneça estável e desacoplada.
+- **Fase 46**: Separação de Autenticação e Bloqueio com Operator Lock Local e Password Corporativo (Tenant Password & Local Terminal Operator Lock Separation):
+  - **Substituição de PIN por Senha Corporativa**: Remoção definitiva do conceito de "PIN" do fluxo de autenticação do Tenant. O contrato `LoginCredentials` e o endpoint `/auth/login` foram reconfigurados para exigir `password` (senha corporativa), assegurando que credenciais de login sigam padrões de segurança convencionais e que chaves do JWT não sejam expostas.
+  - **Criação do Operator Lock Service & UI**: Implementação de um robusto `OperatorLockService` e componente visual `OperatorLockComponent` para gerenciar localmente o travamento físico do terminal. O PIN (padrão `1234`) agora funciona estritamente como um travamento local de sessão (Operator Lock), permitindo a operadores desbloquearem seu terminal sem expor a senha principal ou requerer novos logins contra a API.
+  - **Remoção de Botão Desestruturado e Integração Shell**: O botão desestruturado de "Trocar Empresa" (`switchCompany`) no shell do OS foi permanentemente removido, mitigando riscos de Tenant Leakage. Adicionados controles de segurança explícitos no menu iniciar: "Bloquear Terminal" (chamando `OperatorLockService`) e "Encerrar Sessão" (efetuando logout total do Tenant).
+  - **Segurança de Tipagem e Conformidade Estrita**: Corrigidos todos os tipos e casts nulos. Homologado com sucesso via linter (`ng lint` sem nenhum aviso) e compilador (`ng build` concluído com sucesso absoluto).
+- **Fase 47**: Mitigação de Vulnerabilidades e Enrijecimento de Segurança (Security Audit & Architectural Remediation Tranche 2):
+  - **Remoção de Autoridade Baseada em URL em Interceptores**: Refatoração de `auth.interceptor.ts` para determinar o escopo e autoridade (`X-Authority: hq`) de forma puramente declarativa no cabeçalho do request, eliminando correspondências vulneráveis em substrings da URL (`req.url.includes('/hq/')`). O cabeçalho é removido com segurança antes de ser despachado.
+  - **Remoção de Resolução de Banco de Dados Baseada em URL**: Refatoração de `OsDatabaseService` para resolver o adaptador (`WebDatabaseAdapter` vs `NativeDatabaseAdapter`) exclusivamente com base no contexto de sessão ativa e papéis de usuário no `IdentityService`, blindando a persistência contra falsificações de origem em iframes.
+  - **Enforçamento do SDK Canônico para Aplicativos**: Remoção completa de importações diretas de serviços internos do Kernel (como `PrinterService`) em aplicativos operacionais (`TablesComponent`, `CrmComponent`, `FinanceComponent`). Os aplicativos agora se vinculam estritamente por meio do método canônico `OsSdkService.bind(appId)` e invocam periféricos e storage do `OsContext` retornado.
+  - **Persistência de Logs de Idempotência**: Atualização do mecanismo de sincronização de dados (`server.ts`) para ler e salvar atomicamente em disco (`sync_idempotency_log.json`) o log de transações tratadas com sucesso para garantir idempotência persistente entre reinicializações do servidor.
+  - **Conformidade de Compilação e Linter**: Homologado perfeitamente com `ng lint` (zero erros e avisos) e `ng build` (build de produção limpo e rápido).
+- **Fase 48**: Enrijecimento de Domínio, Isolamento e Integração Limpa POS & Inventory (POS & Inventory Domain Hardening, Isolation & Direct Integration):
+  - **Resolução de Domínio Duplicado (P0/P1)**: Extinção do banco de dados local duplicado de clientes do POS (`loyalty_customers`). O POS foi totalmente refatorado para consultar e interagir diretamente com a fonte de verdade soberana de clientes do CRM via `GetCustomersUseCase` e atribuir pontos transacionalmente via `AddCustomerPointsUseCase`.
+  - **Isolamento de Namespaces de Estoque (P0/P1)**: Substituição de namespaces compartilhados no repositório de inventário por namespaces físicos genuinamente separados e isolados (`inventory.items` e `inventory.movements`) geridos de forma segura pelo `OsDatabaseService`.
+  - **Consistência Transacional no Inventário (P0)**: Refatoração completa de `adjustStock` para utilizar blocos de transação ACID nativos (`ns.transaction`). O ajuste de saldo e o registro do log de movimentação agora são gravados em uma única unidade atômica segura com reversão automática.
+  - **Controle Estrito de Estoque Negativo (P1)**: Abandono da blindagem silenciosa do saldo de estoque (`Math.max(0, ...)`). Implementação de uma política explícita de consistência que rejeita saídas inválidas e lança uma exceção descritiva de estoque insuficiente.
+  - **Enforçamento de Defesa de Tenant e UUIDs (P0/P1)**: Imposição de restrições estritas e validação de `companyId` em todos os repositórios (`getProductById`, `saveProduct`, `getItemById`, `saveItem`, `createSale`, `adjustStock`) para mitigar riscos de vazamento de dados de tenants. Substituição de IDs sequenciais/improvisados por UUIDs criptográficos seguros.
+  - **Sementes Condicionais de Demonstração (P1)**: Desativação do seed automático de produtos e clientes em ambientes de produção. O seed inicial agora ocorre apenas sob a identificação estrita do workspace de demonstração (`comp_1`).
+  - **Nomenclatura Não-Fiscal (P1)**: Renomeação de todas as ocorrências de "Cupom Fiscal" nas interfaces e logs do PDV para "Comprovante de Venda" e "Recibo Térmico" em conformidade com as regras de impressão de vendas sem homologação fiscal ativa.
+  - **Homologação Estrita**: Cobertura perfeita validada com `ng lint` (zero erros/avisos) e compilação de produção (`ng build` concluída com sucesso).
+- **Fase 49**: Auditoria, Higienização e Refinamento de Integrações de Terceiros e Portais Públicos (Public Space, Messaging, Settings & Marketplace Audit):
+  - **Remoção de Alertas Nativos no Public Space**: Refatoração completa de `PublicSpaceManagerComponent` eliminando todos os acoplamentos com `window.alert`. Introdução de sinais reativos de feedback (`feedbackMessage`, `isErrorFeedback`) e um banner dinâmico e polido integrado diretamente no topo do template visual do workspace.
+  - **Identificação Unívoca com UUIDs**: Correção das chaves simuladas baseadas em carimbos de data (`Date.now()`) para UUIDs criptográficos unívocos e consistentes nos despachos de teste do WhatsApp, gerador de logs do Telegram, simulador de pedidos de delivery do iFood e fila de envio offline de testes (Outbox Queue) no painel de configurações gerais do sistema.
+  - **Validação de Conformidade de Fronteira**: Revisão do isolamento no Hub do WhatsApp, Telegram Manager Bot, iFood Delivery Hub, OS Settings e o Marketplace Central da Plataforma, garantindo acoplamento zero com periféricos internos e aderência estrita à camada do `OsSdkService` e contratos canônicos de comunicação.
+  - **Homologação Total de Produção**: 100% verificado sem erros ou advertências no linter e compilador nativo (`ng build` bem-sucedido com zero falhas).
+- **Fase 50**: Centralização do Perfil da Empresa e Integrações Sandbox nas Configurações do OS (Centralized Company Profile & Sandbox Settings):
+  - **Identificação e Contato Corporativos**: Introdução da aba "Perfil da Empresa" como tela inicial nas configurações do OS (`SettingsComponent`). Permite que o usuário consulte dados estruturados do negócio, como Razão Social (resolvida via `IdentityService`), CNPJ/CPF, Segmento, E-mail, Telefone de contato e Endereço comercial.
+  - **Facilitador de Integração (Chaves Sandbox)**: Criação de campos editáveis para parâmetros de canais de desenvolvimento (número simulado de WhatsApp e ID de estabelecimento do iFood). As alterações atualizam os valores em tempo real e são salvas no escopo de empresa do `ConfigurationService`.
+  - **Persistência de Sessão e Configuração**: Modificação do `ConfigurationService` para serializar e ler de forma segura os dados do perfil em `localStorage` sob a chave `3eatcru_company_profile_v1`. Isso assegura que edições persistam mesmo após reloads ou re-autenticações.
+  - **Formulários Reativos Sem NgModel**: Configuração dos formulários e inputs ligando os eventos reativos nativos do Angular diretamente a sinais e métodos de classe, mantendo conformidade estrita e 100% de estabilidade de AOT e build de produção.
+- **Fase 51**: Vinculação Dinâmica de Parâmetros de Sandbox nos Canais do OS (Dynamic Sandbox Parameter Binding in OS Channels):
+  - **Integração Real-Time com WhatsApp**: Atualização do `WhatsappComponent` e `WhatsappTemplateConfigComponent` para receberem e exibirem de forma reativa o número de WhatsApp configurado no Perfil do OS, utilizando-o nos logs de simulação de despacho em tempo real.
+  - **Sincronia Dinâmica no iFood**: Modificação de `IfoodComponent` e `IfoodStoreStatusComponent` para consumir reativamente o Merchant ID configurado em Settings, exibindo as informações dinâmicas do estabelecimento em tempo real no cabeçalho operacional.
+  - **Homologação Estrita e Estabilidade**: Validação total de todas as referências com build de produção (`ng build`) e linter (`ng lint`) assegurando zero inconformidades de tipos ou advertências.
+- **Fase 52**: Integração de Busca na Web e Navegador Web Inteligente Baseado em IA (Grounded Web Search & Intelligent Web Browser):
+  - **Pesquisa na Web Grounded**: Criação de endpoint Express seguro `/api/v1/web-search` integrado ao SDK `@google/genai` utilizando o modelo `gemini-3.8-flash` com `googleSearch` habilitado como ferramenta ativa para realizar pesquisas ao vivo e retornar respostas com grounding de internet e fontes citadas.
+  - **Serviço de Busca Reativo**: Desenvolvimento do `BrowserSearchService` para gerenciar centralizadamente o estado e sinais reativos de busca (`searchQuery`, `isSearching`, `searchResult`, `searchSources`, `searchError`) no client, garantindo desacoplamento.
+  - **Navegador Web Integrado**: Implementação do componente `BrowserComponent` (`app-browser`) estilizado de forma premium no padrão bento-grid com barra de endereços responsiva, botões de navegação, portal com links recomendados e exibição polida de markdown renderizado de alta fidelidade.
+  - **Shortcut no Start Menu**: Inclusão de atalho interativo e dinâmico "Pesquisar na Web" no Menu Iniciar quando o operador digita palavras no campo de buscas, abrindo instantaneamente o navegador web e disparando a busca na rede mundial.
+  - **Homologação Estrita**: 100% verificado com linter (`ng lint` com sucesso absoluto) e compilação de produção (`ng build` concluído com sucesso e livre de erros).
+- **Fase 53**: Aprimoramento Premium do Gerenciamento de Janelas e Fusão do Navegador Web com Periféricos Físicos (Advanced Windowing Mechanics, Persistent Browser History & Thermal Printing Integration):
+  - **Zonas de Encaixe com Hover (Hover Snap Zones)**: Implementação de pré-visualizações visuais translúcidas de encaixe (esquerda/direita) ao passar o cursor do mouse próximo às laterais da tela enquanto se arrasta uma janela.
+  - **Miniatura e Pré-Visualização na Barra de Tarefas (Live Taskbar App Hover Preview Card)**: Desenvolvimento de um card flutuante interativo que surge reativamente ao pairar o cursor sobre as abas abertas da barra de tarefas, com indicação do estado operacional do aplicativo e botões de atalhos rápidos (Minimizar/Restaurar e Fechar) diretamente no card.
+  - **Barra Mostrar Área de Trabalho (Windows-style Show Desktop bar)**: Introdução de um botão sutil de barra lateral no canto inferior direito no estilo clássico do Windows para rapidamente minimizar ou restaurar todas as janelas operacionais ativas na tela de uma só vez.
+  - **Histórico Reativo de Pesquisas (Persistent Search History)**: Configurado o armazenamento local em `localStorage` das últimas 5 pesquisas efetuadas pelo usuário no navegador com atalhos de Bento design para acionamento e consulta imediata de tópicos anteriores.
+  - **Fusão com Spooler de Bobina Térmica (Direct Hardware Spooler Print)**: Integração do navegador inteligente com o periférico simulador de impressora do OS. O usuário agora pode imprimir a síntese consolidada da pesquisa web diretamente em uma bobina de recibo térmica formatada, com banners reativos de status do spooler (enviando, sucesso, erro).
+  - **Estabilidade e Conformidade**: 100% validado sem nenhum aviso no linter (`ng lint` com sucesso completo) e compilador nativo (`ng build` concluído com sucesso absoluto).
+- **Fase 54**: Aceleração de Desempenho em Janelas e Central de Atalhos de Teclado HUD (High-Performance Windowing, Multi-Window Layout Tile & Keyboard Shortcuts HUD Overlay):
+  - **Desempenho Ultra-Responsivo sem Lag**: Otimização da renderização de janelas desativando transições CSS durante drag & resize (`activeDraggingId`, `activeResizingId`).
+  - **Organização de Workspace em Grade e Cascata**: Implementados `tileWindows()` e `cascadeWindows()` no `WindowManagerService`.
+  - **Central de Atalhos de Teclado HUD**: Modal flutuante (`Alt + /`) detalhando todos os atalhos de produtividade disponíveis.
+- **Fase 55**: Navegador com Abas, Filtros por Categoria e Gerenciamento de Favoritos (Multi-Tab Browser, Search Filtering & Bookmarking System):
+  - **Barra de Abas Dinâmica**: Navegação multi-abas integrada ao `BrowserSearchService` de forma reativa.
+  - **Pesquisa Segmentada**: Filtros de domínio ("Geral", "Notícias", "Técnico & Dev", "Finanças").
+  - **Gerenciador de Favoritos**: Painel Bento de favoritos com persistência local.
+- **Fase 56**: Calibração Geométrica, Escala Adaptativa de Ícones e Enquadramento de Viewport Responsivo:
+  - **Escala de Ícones**: Controle reativo com tamanhos `'small'`, `'normal'` e `'large'` no desktop.
+  - **Ajuste de Tela Inteligente (Auto-Fit)**: Recalibração física preventiva para viewports desktop e móveis (`Alt + A`).
+- **Fase 57**: Super-Renderizador Markdown do Navegador Web Inteligente:
+  - **Tabelas Nativas & Hiperlinks Grounding**: Detecção e montagem de tabelas completas e links com target externo seguro.
+- **Fase 58**: Painel Autocomplete e Sugestões Reativas na Barra de Endereços:
+  - **Barra de Endereços Inteligente**: Sugestões dinâmicas com recentes e favoritos ao focar o campo.
+- **Fase 59**: Atalho Global de Acesso Rápido ao Navegador Web (`Alt + S`) e Registro no HUD do Sistema.
+- **Fase 60**: Navegação e Sincronia Bidirecional das Categorias de Pesquisa do Navegador (Same-Tab Navigation & Category Sync).
+- **Fase 61**: Resiliência de Busca com Contingência de Quota e Documentação Consolidada (Search Contingency Mode & Full System Documentation):
+  - **Tratamento Resiliente de Quota & Rate Limits**: Captura inteligente de exceções de sobrecarga de API (`429`, `RESOURCE_EXHAUSTED`, `overloaded`) no endpoint `/api/v1/web-search` com fallback de síntese contextualizada e fontes documentais.
+  - **Criação do README.md Central**: Redação do documento unificado detalhando a arquitetura Dual-OS, navegação com AI Grounding, catálogo de atalhos HUD e especificações de apps.
+- **Fase 62**: Central de Notificações Histórica e Flyout de Calendário Interativo do OS (Interactive Calendar Flyout & Persistent Notification Center):
+  - **Flyout de Calendário Interativo (Windows-style Date & Time Flyout)**: Menu popup na barra de tarefas ou via `Alt + N` com relógio de precisão, calendário mensal interativo e seleção de dias.
+  - **Central de Notificações Persistente**: Histórico contínuo das últimas 30 notificações emitidas pelo sistema com badge contador na bandeja do sistema.
+- **Fase 63**: Gerenciador de Tarefas do Sistema, Menu de Contexto da Área de Trabalho e Refatoração Reativa (System Task Manager, Desktop Right-Click Context Menu & Reactive Search Input):
+  - **Gerenciador de Tarefas do Sistema (Task Manager Component)**: Monitoramento do OS com abas estruturadas (Processos, Serviços do Kernel, Desempenho & Telemetria) via `Alt + T`.
+  - **Menu de Contexto da Área de Trabalho**: Menu contextual nativo na Área de Trabalho com atalhos de janelas, escala e ferramentas.
+  - **Conformidade Reativa**: Remoção de `[(ngModel)]` no Menu Iniciar.
+- **Fase 64**: Menu Iniciar no Estilo Windows 10 e Calculadora Nativa Integrada (Windows 10 Style Start Menu & Native OS Calculator App):
+  - **Menu Iniciar com Layout Tripartido**: Trilho Lateral de Navegação, Coluna Central Alfabética e Painel de Blocos Dinâmicos (Live Tiles Grid).
+  - **Calculadora Nativa do Sistema**: Calculadora padrão Windows 10 com display de histórico, operações comerciais, memória e atalhos de teclado físico.
+- **Fase 65**: Explorador de Arquivos Nativo "Este Computador" com Integração do Kernel e Spooler (Native Virtual File Explorer, Desktop Shortcut, Context Menu & Spooler Printing):
+  - **Explorador de Arquivos Virtual**: Navegação de pastas do OS, alternância de modos de exibição (Grade vs Lista), busca integrada reativa, criação/exclusão/download e impressão direta no spooler térmico via `Alt + E`.
+- **Fase 66**: Remediação da Fundação Arquitetural — Protocolo Unificado de Sincronismo, Outbox Real e Resiliência de Conectividade:
+  - **Unificação dos Contratos de Sincronismo (`SyncAction`)**: Padronização formal dos verbos (`sale.create`, `stock.item.save`, `stock.adjust`, `customer.create`, `customer.points.adjust`, `table.update`, `table.close`, `finance.transaction`) no client e no endpoint central `/api/v1/sync/batch`.
+  - **Processamento Real no Backend Central**: Lógica de processamento atômico no servidor Express com validação de saldo, fidelidade no CRM e conciliação de caixa financeiro.
+  - **Resiliência e Recuperação com Full Jitter**: Listeners de eventos de conectividade e algoritmo de backoff exponencial com Full Jitter contra thundering herd.
+- **Fase 67**: Remediação da Fundação Arquitetural — Persistência, RBAC, Onboarding e Saúde:
+  - **Persistência do Estado Central**: Leitura e gravação assíncrona do `centralState` em `data/central_store.json`.
+  - **RBAC**: Middleware estrito `requireTenantRole(['admin', 'manager'])` blindando rotas administrativas.
+  - **Onboarding e Saúde**: Provisionamento integral via `/api/v1/onboarding/provision` e heartbeat público `/api/v1/health`.
+- **Fase 68**: Remediação da Fundação Arquitetural — Bloco C (Runtime Real de Aplicativos, Cross-Domain Transactions, Segurança e Persistência Atômica):
+  - **App Runtime Verdadeiro (Lazy Loading)**: `AppManifest` com `loadComponent: () => Promise<Type<unknown>>` carregando módulos sob demanda.
+  - **Transações Multi-Namespace (Cross-Domain)**: `OsDatabaseService` e `NativeDatabaseAdapter` suportando `overrideNs` nas transações ACID.
+  - **Início de Drivers Físicos de Hardware**: Suporte a APIs de `navigator.usb` e `navigator.serial` com fallback de emulação simulada.
+- **Fase 69**: Endurecimento de Segurança e Modularização da Arquitetura do Servidor Backend:
+  - **Modularização do Servidor Central**: Decomposição do monolito `src/server.ts` em subsistemas em `/src/server/` (`config.ts`, `state.ts`, `middleware.ts`, `routes/`).
+  - **Criptografia & Tokens**: Hash Scrypt com salt individual e verificação em tempo constante (`timingSafeEqual`), proteção de `JWT_SECRET`.
+  - **Protocolo de Sincronismo Transacional**: `/api/v1/sync/batch` implementando Unit of Work com snapshot e rollback completo.
+- **Fase 70**: Aplicativo Nativo de Diagnóstico & Telemetria do Kernel (Health Diagnostics & Telemetry Application):
+  - **App `HealthDiagnosticsComponent` (`Alt + H`)**: Inspeção visual dos contratos de subsistemas em 5 abas (Subsistemas, Bancos de Dados, Fila Outbox, Hardware Loop e Trilha de Auditoria).
+- **Fase 71**: Refinamento do HQ Central (HQ OS Control Plane), Suporte com Impersonation (Magic Link), Gestão de Configurações do Tenant e Command Palette (`Alt + K`):
+  - **Impersonation de Suporte**: Sessão sintética temporária isolada com papel `hq_support_admin`.
+  - **Command Palette Global do HQ OS (`Alt + K`)**: Atalho de teclado para navegação rápida entre subsistemas do HQ OS.
+- **Fase 72**: Eliminação Integral do NgModel e Migração Total para Reatividade Unidirecional por Sinais:
+  - **Erradicação Completa de NgModel**: 100% de migração dos formulários de todos os módulos para `signal()`, `[value]`, `(input)` e formulários reativos.
+- **Fase 73**: Production Hardening & Modularização de Produção (Security, Modular Server, Auth Pipeline & Shell Decomposition):
+  - **Clientes HTTP Autoritativos**: `ClientApiClient` e `HqApiClient` desacoplados, decomposição modular do shell em subcomponentes autônomos e onboarding com 14 dias de Trial Pro.
+- **Fase 74**: Modularização Completa do Shell OS, Suíte de Testes Unitários e Enrijecimento de Produção:
+  - **Decomposição do Shell**: `OsTaskbarComponent`, `OsDesktopShortcutsComponent`, `OsWindowCompositorComponent`.
+  - **Suíte de Testes Unitários**: Testes para `IdentityService`, `OsDatabaseService`, `WindowManagerService`, `PrinterService` e `HardwareService`.
+- **Fase 75**: Enrijecimento de Segurança P0, Unificação de Contratos de API e Blindagem de Dados Sensíveis:
+  - **Sanitização de Usuários**: `sanitizeUser` impedindo vazamento de credenciais e proteção de campos críticos no HQ (`balance`, `status`, `plan`, `maxTerminals`).
+- **Fase 76**: Circulação Viva do Ecossistema: Integração Ponta a Ponta do Marketplace Público com EventBus Reativo e Notificações no PDV:
+  - **Pedidos Online com Notificação no PDV**: `PublicSpaceCartDrawerComponent` submetendo pedidos online e ingestão automática no PDV via `marketplace.order_created`.
+- **Fase 77**: Central Control Plane em Tempo Real, Rastreabilidade de Pedidos e Pulso Global do Ecossistema:
+  - **Live Activity Stream & Pulse Online**: Monitoramento em tempo real no dashboard do HQ com auto-sync periódico de 10s e registro de pedidos no `centralState.orders`.
+- **Fase 78**: Fluxos Transacionais Reativos Multidomínio (PDV -> Inventory Sync, PDV -> CRM Loyalty, PDV -> Connected WhatsApp Hub):
+  - **Sincronização Dinâmica Cruzada**: Checkout no PDV atualiza estoque, pontua clientes no CRM e despacha notificação digital via WhatsApp Hub.
+- **Fase 79**: Linha de Vida Gerencial e Telemetria de Baixo Nível (Cash Alerts, Shift-Closed Summary via Telegram Bot & EventBus -> Kernel Telemetry):
+  - **Alertas Gerenciais**: Emissão de alertas de sangrias, reforços e fechamento de turno (Relatório Z) diretamente no Telegram Manager Bot.
+- **Fase 80**: Sincronização Dinâmica do KDS e Notificações Automatizadas via WhatsApp:
+  - **Automação KDS -> WhatsApp**: Pedidos atualizados para `READY` ou `DELIVERING` no KDS disparam comprovante digital de comanda via WhatsApp Business Hub.
+- **Fase 81**: Remixagem da Fundação (Desacoplamento, Contracts & Runtime State Machine):
+  - Refatoração e consolidação de todos os aplicativos de negócio (`CRM`, `Tables`, `Inventory`, `POS`, `WhatsApp`, `iFood`, `Telegram`, `Finance`) para consumo padronizado do `OsContext` via `OsSdkService`, eliminando qualquer injeção do núcleo interno do OS (`OsStateService`, `OsEventBusService`, `OperatorLockService`).
+  - Introdução do InjectionToken `OS_DATABASE_ADAPTER` para desacoplar implementações de storage.
+  - Orquestração do `OsWindowCompositorComponent` via carregamento dinâmico com `ngComponentOutlet` sincronizado com a máquina de estados reativa (`AppLoadingState`: `unloaded`, `loading`, `loaded`, `failed`) do `AppRegistryService`.
+- **Fase 82**: Separação Visual HQ ➔ Client OS:
+  - Isolamento total do `OsShellComponent` de componentes administrativos do HQ OS, mantendo a experiência do desktop do cliente limpa e soberana.
+- **Fase 83**: Enrijecimento de Segurança de Operador e Credenciais:
+  - Parametrização das credenciais de administração central via variáveis de ambiente (`HQ_ADMIN_EMAIL`, `HQ_ADMIN_PASSWORD`, `HQ_ADMIN_SECRET`), documentadas em `.env.example`.
+  - Blindagem do endpoint `/api/v1/auth/operator-unlock` com validação de token Bearer da sessão do terminal, verificação criptográfica de JWT e proteção Anti-IDOR tenant/operador.
+- **Fase 84**: Persistência & Resiliência de Armazenamento Atômico:
+  - Garantia de atomicidade rigorosa na persistência do estado central e nos registros de idempotência (`state.ts`), utilizando arquivos `.tmp` e `renameSync` para prevenir corrupção de dados em reinicializações inesperadas.
+- **Fase 85**: Sanitização de Dados e Eliminação de Mocks:
+  - Remoção de dados simulados (coordenadas, distâncias e avaliações artificiais) no marketplace (`public-space.ts`) e eliminação de respostas estáticas fictícias em `web-search.ts`, garantindo que o servidor retorne erros HTTP declarativos (503/502) quando recursos externos não estiverem parametrizados.
+- **Fase 86**: Estabilização da Auditoria V10 & Blindagem de Storage:
+  - Implementação do export de backup real em formato JSON (`Blob`) no `IndexedDbDatabaseAdapter`, exclusão atômica por cursor no `clear()`, isolamento e filtragem de contexto por filial (`branchId`) em endpoints de Vendas, Mesas, Transações Financeiras, Produtos e Clientes, além de estabilização com 100% dos testes unitários e de pureza do OS aprovados.
+- **Fase 87**: Hardening de Segurança, Sessões Auditadas de Suporte & Dead-Letter Queue:
+  - Enrijecimento estrito de runtime (`JWT_SECRET` e `HQ_ADMIN_PASSWORD` obrigatórios em produção no boot), introdução de endpoints auditados de impersonação de suporte (`/api/v1/auth/impersonate` e `/api/v1/auth/impersonate/exit` com emissão de logs `SUPPORT_SESSION_STARTED` / `SUPPORT_SESSION_ENDED`), evolução da conectividade do Outbox em 3 níveis (`networkOnline`, `serverReachable`, `syncHealthy`), implementação de transição para Dead-Letter Queue (`status: 'dead_letter'`) após limite de retentativas com teto de backoff exponencial de 120s com jitter, e criação da suite de testes de isolamento multi-tenant (`security-tenant-isolation.spec.ts`).
+- **Fase 88**: Conclusão Integral do Plano de Correção Arquitetural (Fases A a H):
+  - **Fase A (Segurança de Fronteira)**: Autenticação com TOTP RFC 6238 sem fallbacks em produção, rate-limiting, HMAC timingSafeEqual em webhooks de pagamento e credenciais dinâmicas.
+  - **Fase B (Purificação do SDK)**: Desacoplamento de todos os aplicativos de negócio (CRM, Tables, Inventory, POS, WhatsApp, iFood, Telegram, Finance) para consumo exclusivo do `OsContext` via `OsSdkService`.
+  - **Fase C (Unificação de Estado)**: Autoridade única de tenant centralizada no `IdentityService` e isolamento estrito entre sessões do HQ e do Client OS.
+  - **Fase D (Maturidade do App Runtime)**: Máquina de estados desacoplada (`AppLoadingState`) e orquestração assíncrona de ciclo de vida com `ngComponentOutlet`.
+  - **Fase E (Sanitização DTO & Zod)**: Schemas estritos para validação de payloads nas rotas com `validateBody`.
+  - **Fase F (Resolução de Storage)**: Renomeação semântica para `PlatformDatabaseAdapter`, abstração do storage sob `IOsDatabaseAdapter` e suites de isolamento multi-tenant.
+  - **Fase G (Infraestrutura Relacional Central)**: Drizzle ORM + SQLite (`central_platform.db`) com journaling WAL, transações ACID e sincronização atômica contínua.
+  - **Fase H (Adoção Cloud & Remote Sync)**: Contratos `ICloudSyncAdapter`, serviço `CloudSyncAdapter` e resolução dinâmica do motor de armazenamento no `PlatformDatabaseAdapter` (Desktop Native SQLite, Browser IndexedDB e SSR/Headless Virtual Memory).
+- **Fase 89**: Persistência Central SQLite-First (Bloco 1):
+  - SQLite (`central_platform.db`) é a autoridade e fonte de verdade primária única no boot do servidor. O arquivo `central_store.json` opera estritamente como export/backup secundário. Exclusões de registros contam com conciliação e espelhamento real via `DELETE`.
+- **Fase 90**: Sincronização & Concorrência Transacional (Bloco 2):
+  - Unidade de Trabalho transacional com exclusão mútua por tenant (`acquireTenantLock`), validação estrita com schemas Zod para todas as mutações e Dead-Letter Queue resiliente.
+- **Fase 91**: Segurança de Credenciais & TOTP Obrigatório (Bloco 3):
+  - Rate-limiting por IP real (`getClientIp`), eliminação de fallbacks estáticos em produção e TOTP RFC 6238 obrigatório para administradores HQ.
+- **Fase 92**: Governança & SemVer 2.0.0 Canônico (Bloco 4):
+  - Motor canônico SemVer 2.0.0 unificado (`parseSemVer`, `compareSemVer`, `satisfiesSemVer`), ciclo de vida de apps com máquina de estados finita e releases imutáveis com checksum SHA-256.
+- **Fase 93**: Observabilidade & Health Endpoints (Bloco 5):
+  - Endpoints `/health`, `/health/liveness`, `/health/readiness` e publicação do `ARCHITECTURE_BASELINE.md`.
+- **Fase 94**: Estabilização de Transações Atômicas & Resolução de Imports (Bloco 6):
+  - Resolução e injeção canônica do singleton `centralDatabase` (`CentralDatabaseEngine`) em todas as rotas do servidor (`store.ts`, `hq-apps.ts`, `public-space.ts`, `telemetry.ts`, `companies.ts`).
+  - Purificação de imports em `store.ts` e `central-db.ts`, eliminando `require()` em conformidade com as regras estritas do ESLint (`@typescript-eslint/no-require-imports`).
+- **Fase 95**: Remediação Integral da Plataforma de Apps & Contratos (Bloco 7):
+  - **C-01 (Registro de Dispositivos SQLite)**: Alinhamento estrito do schema da tabela `devices` e transação ACID `registerDeviceTransaction` com suporte completo a chaves de hardware, `os_version`, `fingerprint_hash`, `installation_id` e isolamento multi-tenant.
+  - **C-02 (Anti-Spoofing de Versão do OS)**: Versão do dispositivo tornada Server-Authoritative através de consulta na base de dispositivos (`centralDatabase.getDevice`), eliminando confiança cega em headers arbitrários do cliente (`x-device-os-version`).
+  - **C-03 & C-04 (Maturidade do App Runtime & AppAccessService)**: Criação do `AppAccessService` unificado para resolução soberana de acesso (`entitled? installed? compatible? permissions? dependencies?`). Manifestos dos módulos sincronizados com versões do catálogo e eliminação de bypass no `AppRuntimeService.createContext`.
+  - **H-01 (Instalação por Dispositivo)**: Separação canônica entre `AppEntitlement` (escopo da empresa: `companyId:appId`) e `AppInstallation` (escopo do terminal: `companyId:deviceId:appId`).
+  - **H-02 (Validação de Dependências no Update)**: Endpoint `/store/update` validando recursivamente requisitos e dependências antes de permitir atualização.
+  - **H-03 (Segregação de Canais Stable/Beta)**: Seleção inteligente de releases compatíveis de acordo com o canal do tenant (`stable` vs `beta`).
+  - **H-04 (Integridade do Checksum de Release)**: Endpoint `/store/updates` retorna o checksum SHA-256 autêntico da release imutável.
+  - **H-05, H-06 & H-07 (Unificação de Catálogo, Pricing e Lifecycle)**: Eliminação de rotas legadas duplicadas; tela HQ consumindo exclusivamente `/api/v1/hq/apps`; taxonomia comercial unificada (`FREE`, `ONE_TIME`, `SUBSCRIPTION_MONTHLY`, `SUBSCRIPTION_ANNUAL`, `USAGE_BASED`); e ciclo de vida padronizado (`DRAFT`, `IN_REVIEW`, `APPROVED`, `PUBLISHED`, `SUSPENDED`, `RETIRED`, `REJECTED`).
+- **Fase 96**: Refinamento do Shell Visual e Painel do Operador Bento (Bloco 8):
+  - **Metáfora Web OS p/ Business**: Consolidação do Client OS como um ambiente de trabalho desktop completo de alta fidelidade (atalhos do workspace, barra de tarefas com status, gerenciador de janelas cascateadas).
+  - **Painel do Operador Bento**: Widget bento-style na lateral direita do Desktop, reunindo telemetria física (bobina de papel, diagnóstico de conectividade), notas/memos persistentes por empresa e monitor detalhado de sincronização com feed de transações da Outbox e alertas de Dead-Letter Queue.
+- **Fase 97**: Consolidação da Plataforma de Apps, OTA & Desacoplamento Legado (Bloco 9):
+  - **Autoridade de Autenticação Segregada**: Refatoração do `AuthInterceptor` no Client OS para respeitar estritamente o contexto `AUTH_AUTHORITY` (`'hq'` vs `'client'`), eliminando heurísticas frágeis de URL e garantindo isolamento total de tokens entre os dois sistemas operacionais.
+  - **Reconciliação e Persistência sem Data Churn**: Correção estrutural em `central-db.ts` (`persistState`) para deleções baseadas na chave primária canônica de SQLite (`id`), eliminando churn ou perda de registros ao persistir Maps em banco.
+  - **Padronização Canônica de Chaves de Entitlement & Installation**: Funções unificadas `getEntitlementKey(companyId, appId)` e `getInstallationKey(companyId, deviceId, appId)` utilizadas em todo o ecossistema (`state.ts`, `store.ts`, `central-db.ts`), garantindo 100% de sobrevivência e consistência de estado entre restarts do servidor.
+  - **Verificação Estrita de Integridade e Staging OTA**: No endpoint de atualização de apps (`POST /store/apps/:id/update`), implementação da validação e conferência criptográfica obrigatória do hash SHA-256 do pacote/artefato contra o manifesto assinado da release antes da ativação transacional da nova versão (`otaStage: 'ACTIVATED'`).
+  - **Blindagem do Legado `installedApps`**: Bloqueio definitivo de mutações arbitrárias em `installedApps` via API (`PUT /companies/:id`), delegando exclusivamente às transações atômicas de Store (`installStoreAppTransaction` / `uninstallStoreAppTransaction`) a responsabilidade pela instalação soberana por terminal.
+  - **Acesso Seguro a Artefatos**: Endpoint `GET /artifacts/:id` protegido com verificação autoritativa de licença/entitlement ativo para o tenant solicitante.
+- **Fase 98**: Remediação Integral de Segurança P0/P1 (Bloco 10):
+  - **SEC-01 & SEC-13 (Prevenção de Escalada de Privilégios & Invariante de Domínio)**: Restrição canônica de papéis no nível de banco de dados (`CHECK(role IN ('admin', 'manager', 'operator'))` na tabela `company_users`), validação rigorosa de schemas Zod (`TenantRoleSchema`) nas rotas de criação e atualização de operadores em `companies.ts`, com rejeição imediata (HTTP 400) de injeções de `hq_admin` ou papéis não autorizados para tenants.
+  - **SEC-02 (Blindagem de Impersonação e Suporte)**: Bloqueio estrito de sessões de suporte em rotas globais do HQ Control Plane em `requireHqAdmin` (HTTP 403). Expansão do middleware `requireTenant` e do utilitário `resolveEffectiveTenant` para inspecionar parâmetros de consulta (`req.query.companyId`), prevenindo qualquer bypass de isolamento multi-tenant via query strings.
+  - **SEC-03 (Segregação Estrita de Login e PIN)**: Eliminação de qualquer fallback de PIN na rota pública `/api/v1/auth/login`. A autenticação de sessão exige exclusivamente credenciais completas (`email` e `password`) com validação via Zod e rate-limiting por IP. O PIN é reservado exclusivamente para o fluxo autenticado de terminal `/api/v1/auth/operator-unlock` sob sessão Bearer ativa.
+  - **SEC-04 (Dedução Atômica de Estoque no SQLite)**: Execução de validação e dedução de estoque de itens de marketplace dentro da mesma transação atômica ACID do SQLite (`runInTransaction` em `saveMarketplaceOrderTransaction`), prevenindo condições de corrida e inconsistências de estoque sob alta concorrência.
+  - **SEC-05 (Revogação Persistente de Sessões)**: Criação da tabela `revoked_tokens` no SQLite (`central_platform.db`). Métodos `revokeToken` e `isTokenRevoked` no `config.ts` operando com cache L1 em memória e persistência ACID L2 em banco de dados, garantindo que sessões revogadas permaneçam bloqueadas mesmo após reinicialização do servidor.
+  - **SEC-07 (Sanitização e Schemas Zod em Rotas Críticas)**: Validação declarativa com Zod em rotas de onboarding (`onboarding.ts`) e gestão de usuários de empresas (`companies.ts`), reforçando políticas de senhas mínimas (6 caracteres) e PINs numéricos.
+  - **SEC-14 (Eliminação Total de Fallbacks e Dicas Hardcoded de PIN "1234")**: Purgação de fallbacks `'1234'` em cadastros de usuários (`tenant-users-modal.component.ts`), onboarding público (`onboarding.component.ts`) e tela de bloqueio (`operator-lock.component.ts`), delegando geração segura (`crypto.randomBytes`) no backend e validação estrita no frontend.
+- **Fase 99**: Alinhamento de Esquemas Relacionais & Resiliência de Persistência (Bloco 11):
+  - Sincronização e complementação total dos esquemas em `schema.ts` com as tabelas físicas do SQLite em `central-db.ts` (`public_spaces`, `orders`, `telemetry`, `os_releases`, `app_catalog`, `app_releases`, `app_artifacts`, `processed_webhook_events`).
+  - Inclusão de rotinas `ensureCol` e criação de índices únicos (`idx_telemetry_id`, `idx_os_releases_version`, `idx_app_releases_uniq`) no `initDatabase`.
+  - Refatoração de transações e persistência com cláusulas resilientes de checagem/atualização em SQLite (`upsertPublicSpaceTransaction`, `saveTelemetryTransaction`, `upsertOsReleaseTransaction`, `addAppArtifact`).
+- **Fase 100**: Hardening Operacional & Inicialização Explícita de Banco (Bloco 12):
+  - Interrupção explícita de inicialização em caso de falha de abertura do SQLite no boot.
+  - Purificação de imports ESM no topo de arquivos de rotas (`requirePaymentGatewaySignature` em `companies.ts`).
+- **Fase 101**: Resolução de P0s de Segurança, Migração Idempotente & PIN Criptográfico (Bloco 13):
+  - **P0.1 (Migration Engine Idempotente)**: Refatoração de `central-db.ts` eliminando suposições cegas de tabelas legadas. Uso de `IF NOT EXISTS` com controle transacional via `schema_migrations`.
+  - **P0.2 (PIN de Operador 100% Criptográfico)**: Eliminação definitiva do fallback em texto plano em `/operator-unlock`. Apenas validações criptográficas via `verifyPassword` com salt são aceitas.
+  - **P0.3 (Prevenção contra Vazamento de Credenciais)**: Criação da suíte `security-leakage.spec.ts` validando que senhas em texto puro, PINs não-hasheados e chaves MFA nunca são persistidos em backups JSON, queries SQLite ou detalhes de auditoria.
+  - **P1.1 (Permissões Granulares no Catálogo de Apps)**: Substituição de wildcards por permissões de escopo específico (`storage.read`, `hardware.printer`, `sales.read`, `orders.write`, etc.).
+- **Fase 102**: Fechamento do HQ, Rate-Limiter SQLite & Validação DTOs Zod (Bloco 14):
+  - **P1.2 (Sessão Segura por Cookies/Session)**: Suporte de sessões baseadas em cookies nos fluxos de autenticação do `IdentityService` e `auth.ts`.
+  - **P1.3 (Rate-Limiter Atômico SQLite-Backed)**: Migração total da rota de onboarding para o novo `centralDatabase.checkRateLimit`.
+  - **P1.4 (HMAC por Buffer rawBody)**: Enrijecimento de `requirePaymentGatewaySignature` utilizando o buffer autêntico de `rawBody`.
+  - **P1.5 (DTO Coverage Completo)**: Cobertura total de validação de schemas Zod em `store.ts` e `docs-search.ts`.
+  - **P1.6 (SemVer Canônico de Produtos)**: Comparação SemVer unificada em rotas de store e empresas.
+  - **P1.7 (Cleanup de GET /companies em AccessComponent)**: Purgação de listagens e dados mockados em `AccessComponent`.
+- **Fase 103**: Hardening Rate-Limiter Fail-Closed, Bootstrap hasData & Auto-Migração MFA (Bloco 15):
+  - `checkRateLimit` operando sob política "fail-closed".
+  - `hasData()` no `CentralDatabaseEngine` verificando também a tabela `hq_admins` para prevenir re-triggering de onboarding acidental.
+  - Auto-migração transacional de segredos MFA legados (`migrateLegacyMfaSecrets()`).
+  - Mascaramento de erros 500 no ambiente de produção.
+- **Fase 104**: Backup Criptografado Multi-Motor & Ciclo de Vida de Impersonação (Bloco 17):
+  - Backup criptografado multi-motor com suporte a AES-GCM-256 e PBKDF2 (`PBKDF2-SHA-256`, 100.000 iterações) em `PlatformDatabaseAdapter`, `DevelopmentVirtualAdapter` e `SqliteNativeAdapter`.
+  - Testes e consolidação de ciclo de vida completo no `IdentityService` (`impersonateTenant` e `exitSupportImpersonation`).
+- **Fase 105**: Precificação Server-Authoritative no Sync & Idempotência no Marketplace (Bloco 19):
+  - **P0-03 (Autoridade de Precificação no Sync)**: Recálculo autoritativo de valores de itens no servidor com base no catálogo master (`prod.price`).
+  - **P1-02 (Decodificação de Token & Revogação Segura no Logout)**: Suporte a tokens via headers e cookies `HttpOnly` no logout com registro de auditoria pré-revogação.
+  - **P1-09 (Fail-Closed na Criptografia de Backup)**: Operação fail-closed com lançamento imediato de exceções em caso de falha criptográfica.
+  - **P1-12 (Rate Limiting & Idempotência no Marketplace Público)**: Rota `POST /public-space/orders` protegida com limitador por IP e cache de chave de idempotência (`x-idempotency-key`).
+- **Fase 106**: Identidade Global 3eatcru ID & Migração SQLite v7 (Bloco 20):
+  - Implementação completa do serviço de identidade global de consumidor (`CustomerAccount`) com cadastro, autenticação `scrypt`, tokens JWT dedicados, gestão de endereços e favoritos.
+  - Migração relacional v7 no SQLite (`customer_accounts`) vinculando `orders.customer_account_id` e `customers.customer_account_id`.
+  - Vínculo transacional de pedidos do Marketplace com o CRM local do estabelecimento (`CompanyCustomer`).
+- **Fase 107**: Requisitos Críticos de Governança B-01 a B-07 (Bloco 21):
+  - Metadados de integridade OTA (`artifactId`, `signature`, `checksum`) e instalação direcionada por canal do tenant.
+  - Bloqueio de dispositivos com status `BLOCKED` ou `PENDING` na Store com HTTP 403.
+  - Middleware `assertBranchAccess()` validando permissões por filial.
+  - Restrição de boot local-first apenas a containers nativos e proibição de alterações em `installedApps` via API.
+- **Fase 108**: Hardening de Autorização de Filiais, Migração v8 & Limpeza de Dispositivos (Bloco 22):
+  - Migração v8 no SQLite garantindo a coluna `branch_ids` na tabela `company_users`.
+  - Injeção de `branchIds` e `authPlane: 'CLIENT'` no payload do JWT no login de operadores.
+  - Limpeza atômica em cascata de instalações órfãs (`app_installations`) no descomissionamento de dispositivos físicos (`deleteDeviceTransaction`).
+- **Fase 109**: Hierarquia de Permissões, Precedência OTA & E2E da Plataforma de Apps (Bloco 23):
+  - Hierarquia estrita de permissões em `AppAccessService` (permissão pai concede filhas).
+  - Precedência de canal OTA garantindo que tenants no canal beta recebam releases beta mesmo com SemVer estável superior.
+  - Fluxo E2E completo da Store testado (`store-platform-e2e.spec.ts`): DRAFT -> Release 1.0.0 com SHA-256 -> Publicação -> Entitlement & Instalação por dispositivo -> Restart de banco -> Release 1.1.0 -> Atualização OTA -> Desinstalação com preservação de entitlement.
+- **Fase 110**: Auditoria Sênior Pro — Build 22 (A22-01 a A22-10):
+  - **A22-01 & A22-02 (Autoridade de Instalações via SQLite)**: Consolidação da tabela `app_installations` como a única fonte de verdade para instalações locais por terminal (`companyId:deviceId:appId`). Depreciação definitiva do campo legado `company.installedApps`.
+  - **A22-03 & A22-07 (Distribuição Autoritativa de Artefatos & Segurança OTA)**: Endpoint `GET /artifacts/:id` protegido por verificação de release ativa (`PUBLISHED`), compatibilidade de canal do tenant (`stable` vs `beta`), permissão de entitlement ativo e validação do hash SHA-256 do binário.
+  - **A22-04 (Registro Canônico de Permissões da Plataforma)**: Criação de `src/app/contracts/apps/permissions.registry.ts` padronizando formalmente os identificadores de permissão do sistema (`storage`, `printer`, `network`, `notifications`, `system`, `sales`, `hardware`) e suas categorias.
+  - **A22-05 (Atualização Atômica de Manifestos em Runtime)**: Adição do método `upgradeManifestVersion` no `AppRegistryService`, permitindo sincronização atômica do manifesto local do app no Client OS quando uma atualização OTA for aplicada.
+  - **A22-06 (Máquina de Estados de Atualização no StoreComponent)**: Substituição de simulações de progresso por máquina de estados estrita de 5 estágios (`CHECKING` ➔ `DOWNLOADING` ➔ `VERIFYING` ➔ `INSTALLING` ➔ `DONE`) na interface do usuário.
+  - **A22-08 (Tipagem Estrita e Desacoplamento de Canais)**: Resolução de incompatibilidades de tipagem em `src/server/routes/store.ts` (`company.channel` vs `company.releaseChannel`).
+  - **A22-09 (Validação Automatizada de Regressão e Segurança)**: Criação de testes de segurança em `platform-audit-hardened.spec.ts` cobrindo distribuição de artefatos não publicados, tentativas de download entre canais incompatíveis e validação de chaves compostas de instalação.
+  - **A22-10 (Homologação Global de Qualidade)**: Aprovação total com 100% dos testes unitários e de integração verdes (54 no frontend, 41 no backend), conformidade estrita no linter Angular (`ng lint`) e compilação de produção consolidada (`compile_applet`).
+- **Fase 111**: Auditoria Sênior Pro 2026 — OS Capability Completion & Sincronização Integral de Presença Digital (Public Space Unit of Work):
+  - **Identificação do Gap Operacional**: A Auditoria Sênior Pro de 20/09/2026 destacou que embora a plataforma possuísse contratos de Presença Digital (`Public Space`) e interface de personalização, a infraestrutura de sincronização bidirecional do OS não propagava os dados do terminal para o servidor central através do protocolo oficial de Outbox.
+  - **Sincronização Server-Authoritative (`public_space.update`)**:
+    - Criação do schema declarativo Zod `PublicSpaceUpdateSchema` em `src/server/routes/sync.ts` validando slug, título, descrição, logo, templateId, themeColor, status, contato, horário e catálogo de produtos.
+    - Atribuição canônica de permissões RBAC (`ACTION_PERMISSIONS.public_space = ['manager', 'admin']`) e validação de entitlement do app (`ACTION_REQUIRED_APPS.public_space = 'public_space'`).
+    - Integração de `publicSpacesSnapshot` no padrão **Unit of Work** em `sync.ts`: em caso de erro em qualquer operação do lote, todas as mutações no mapa `centralState.publicSpaces` são revertidas atomicamente junto com vendas, produtos, clientes e mesas.
+  - **Persistência Relacional ACID em SQLite (`applySyncBatchTransaction`)**:
+    - Extensão do motor `applySyncBatchTransaction` em `src/server/db/central-db.ts` para receber e persistir o array `publicSpaces`.
+    - Execução de UPSERT atômico em `public_spaces` com integridade referencial de chaves estrangeiras (`company_id REFERENCES companies(id)`).
+  - **Sincronização Client-Side (Pull)**:
+    - Atualização de `GET /pull` para incluir o payload `publicSpace` associado à empresa do tenant.
+    - Atualização do `SyncService` no Client OS para persistir o espaço público no namespace isolado `tenant.{tenantId}.public_space`.
+  - **Homologação Automatizada**:
+    - Criação de suíte de testes dedicada `sync-public-space.spec.ts` validando persistência transacional no SQLite com WAL, integridade de FK e idempotência em updates conflitantes.
+    - Suíte completa do servidor executada com 100% de sucesso (12 arquivos de teste, 68 testes aprovados).
+
+
+

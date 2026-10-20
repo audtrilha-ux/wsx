@@ -1,0 +1,236 @@
+<div class="h-full flex flex-col bg-slate-50 font-sans text-slate-800">
+  
+  <!-- Top Navigation & Header -->
+  <header class="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+        <mat-icon class="text-xl">table_restaurant</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900 leading-tight flex items-center gap-2">
+          Mesas, Comandas & Cozinha (KDS)
+          <span class="text-[10px] font-mono uppercase bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">Food Service OS</span>
+        </h2>
+        <p class="text-xs text-slate-500">Gestão de salão, comandas eletrônicas, fila de produção KDS e pré-conta com emissão térmica.</p>
+      </div>
+    </div>
+
+    <!-- Mode Toggle & Global Stats -->
+    <div class="flex items-center gap-3">
+      <div class="bg-slate-100 p-1 rounded-lg flex items-center border border-slate-200">
+        <button 
+          (click)="viewMode.set('SALON')"
+          [class.bg-white]="viewMode() === 'SALON'"
+          [class.shadow-sm]="viewMode() === 'SALON'"
+          [class.text-indigo-700]="viewMode() === 'SALON'"
+          class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 transition-all flex items-center gap-1.5">
+          <mat-icon class="text-xs">grid_view</mat-icon> Mapa de Salão
+        </button>
+        <button 
+          (click)="viewMode.set('KDS')"
+          [class.bg-white]="viewMode() === 'KDS'"
+          [class.shadow-sm]="viewMode() === 'KDS'"
+          [class.text-indigo-700]="viewMode() === 'KDS'"
+          class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-600 transition-all flex items-center gap-1.5">
+          <mat-icon class="text-xs">soup_kitchen</mat-icon> Cozinha (KDS)
+          @if (pendingKitchenCount() > 0) {
+            <span class="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-bold font-mono animate-pulse">
+              {{ pendingKitchenCount() }}
+            </span>
+          }
+        </button>
+      </div>
+
+      <button 
+        (click)="loadData()" 
+        class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors"
+        title="Atualizar dados">
+        <mat-icon class="text-sm">refresh</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Feedback Toast Banner -->
+  @if (feedbackMessage()) {
+    <div class="bg-indigo-600 text-white text-xs px-6 py-2 flex items-center justify-between shadow-inner animate-fade-in">
+      <span class="font-medium flex items-center gap-1.5">
+        <mat-icon class="text-xs">info</mat-icon> {{ feedbackMessage() }}
+      </span>
+      <button (click)="feedbackMessage.set('')" class="text-indigo-200 hover:text-white">
+        <mat-icon class="text-xs">close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- SALON VIEW: MAPA DE MESAS -->
+  @if (viewMode() === 'SALON') {
+    <div class="flex-1 overflow-y-auto p-6 space-y-5">
+      
+      <!-- Salon KPIs Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Capacidade Total</span>
+            <div class="text-lg font-bold font-mono text-slate-800">{{ tables().length }} mesas</div>
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+            <mat-icon class="text-lg">room_preferences</mat-icon>
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-emerald-600 font-bold uppercase tracking-wider">Livres</span>
+            <div class="text-lg font-bold font-mono text-emerald-700">{{ availableTablesCount() }}</div>
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <mat-icon class="text-lg">check_circle</mat-icon>
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-blue-600 font-bold uppercase tracking-wider">Ocupadas / Consumo</span>
+            <div class="text-lg font-bold font-mono text-blue-700">{{ occupiedTablesCount() }}</div>
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <mat-icon class="text-lg">restaurant</mat-icon>
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-indigo-600 font-bold uppercase tracking-wider">Total em Salão</span>
+            <div class="text-lg font-bold font-mono text-indigo-700 font-semibold">R$ {{ totalSalonRevenue() | number:'1.2-2' }}</div>
+          </div>
+          <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <mat-icon class="text-lg">payments</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Pills -->
+      <div class="flex items-center gap-2">
+        <button 
+          (click)="tableFilter.set('ALL')"
+          [class.bg-slate-900]="tableFilter() === 'ALL'"
+          [class.text-white]="tableFilter() === 'ALL'"
+          [class.bg-white]="tableFilter() !== 'ALL'"
+          [class.text-slate-600]="tableFilter() !== 'ALL'"
+          class="px-3 py-1 rounded-lg text-xs font-bold border border-slate-200 transition-colors">
+          Todas ({{ tables().length }})
+        </button>
+        <button 
+          (click)="tableFilter.set('AVAILABLE')"
+          [class.bg-emerald-600]="tableFilter() === 'AVAILABLE'"
+          [class.text-white]="tableFilter() === 'AVAILABLE'"
+          [class.bg-white]="tableFilter() !== 'AVAILABLE'"
+          [class.text-emerald-700]="tableFilter() !== 'AVAILABLE'"
+          class="px-3 py-1 rounded-lg text-xs font-bold border border-slate-200 transition-colors">
+          Livres ({{ availableTablesCount() }})
+        </button>
+        <button 
+          (click)="tableFilter.set('OCCUPIED')"
+          [class.bg-blue-600]="tableFilter() === 'OCCUPIED'"
+          [class.text-white]="tableFilter() === 'OCCUPIED'"
+          [class.bg-white]="tableFilter() !== 'OCCUPIED'"
+          [class.text-blue-700]="tableFilter() !== 'OCCUPIED'"
+          class="px-3 py-1 rounded-lg text-xs font-bold border border-slate-200 transition-colors">
+          Ocupadas ({{ occupiedTablesCount() }})
+        </button>
+        <button 
+          (click)="tableFilter.set('BILLING')"
+          [class.bg-amber-600]="tableFilter() === 'BILLING'"
+          [class.text-white]="tableFilter() === 'BILLING'"
+          [class.bg-white]="tableFilter() !== 'BILLING'"
+          [class.text-amber-700]="tableFilter() !== 'BILLING'"
+          class="px-3 py-1 rounded-lg text-xs font-bold border border-slate-200 transition-colors">
+          Em Fechamento ({{ billingTablesCount() }})
+        </button>
+      </div>
+
+      <!-- Tables Grid (Modular TableCardComponent) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        @for (table of filteredTables(); track table.id) {
+          <app-table-card
+            [table]="table"
+            (openTableModal)="openTableModal($event)"
+            (reserveTable)="selectedTableForReservation.set($event)"
+            (cancelReservation)="cancelReservation($event)"
+            (viewOrder)="selectOrderDetails($event)"
+            (checkoutTable)="openCloseTableModal($event)">
+          </app-table-card>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- KDS VIEW: KITCHEN DISPLAY SYSTEM (Modular KdsDisplayComponent) -->
+  @if (viewMode() === 'KDS') {
+    <app-kds-display
+      [kitchenOrders]="kitchenOrders()"
+      [onlineOrders]="onlineOrders()"
+      (updateItemStatus)="updateItemStatus($event.tableId, $event.itemId, $event.status)"
+      (updateOnlineStatus)="updateOnlineOrderStatus($event.orderId, $event.status)"
+      (printTicket)="printKitchenTicket($event.tableNumber, $event.tableName, $event.order)"
+      (printOnlineTicket)="printOnlineDeliveryTicket($event)">
+    </app-kds-display>
+  }
+
+  <!-- MODAL: ABRIR MESA (Modular TableOpenModalComponent) -->
+  @if (selectedTableForOpen(); as openTable) {
+    <app-table-open-modal
+      [table]="openTable"
+      (closeModal)="selectedTableForOpen.set(null)"
+      (confirm)="confirmOpenTable($event.customerCount, $event.waiterName)">
+    </app-table-open-modal>
+  }
+
+  <!-- MODAL: RESERVAR MESA (Modular TableReservationModalComponent) -->
+  @if (selectedTableForReservation(); as resTable) {
+    <app-table-reservation-modal
+      [table]="resTable"
+      (closeModal)="selectedTableForReservation.set(null)"
+      (confirm)="confirmReserveTable($event.clientName, $event.time, $event.peopleCount, $event.contact)">
+    </app-table-reservation-modal>
+  }
+
+  <!-- MODAL: DETALHES DA COMANDA / ADICIONAR ITENS (Modular TableOrderModalComponent) -->
+  @if (selectedTableForOrder(); as orderTable) {
+    <app-table-order-modal
+      [table]="orderTable"
+      [availableTables]="tables()"
+      (closeModal)="selectedTableForOrder.set(null)"
+      (addItem)="addItemToCurrentTable($event.name, $event.quantity, $event.price, $event.notes)"
+      (checkout)="openCloseTableModal($event)"
+      (printPreBill)="printPreBill($event)"
+      (cancelItem)="cancelOrderItem($event)"
+      (applyDiscount)="applyDiscount($event.discountValue, $event.discountType)"
+      (transferTable)="transferTable($event.sourceTableId, $event.targetTableId)"
+      (joinTables)="joinTables($event.sourceTableId, $event.targetTableId)"
+      (startSplit)="openSplitModal($event)">
+    </app-table-order-modal>
+  }
+
+  <!-- MODAL: SEPARAR / DIVISIONAR COMANDA (Modular TableSplitModalComponent) -->
+  @if (selectedTableForSplit(); as splitTable) {
+    <app-table-split-modal
+      [table]="splitTable"
+      [availableTables]="tables()"
+      (closeModal)="selectedTableForSplit.set(null)"
+      (confirmSplit)="confirmSplitTable($event.targetTableId, $event.itemIdsToMove)">
+    </app-table-split-modal>
+  }
+
+  <!-- MODAL: FECHAR CONTA & RECEBER (Modular TableCheckoutModalComponent) -->
+  @if (selectedTableForClose(); as closeTable) {
+    <app-table-checkout-modal
+      [table]="closeTable"
+      (closeModal)="selectedTableForClose.set(null)"
+      (confirm)="confirmCloseTable($event)"
+      (payPartial)="confirmPayPartial($event.amount, $event.paymentMethod)">
+    </app-table-checkout-modal>
+  }
+
+</div>

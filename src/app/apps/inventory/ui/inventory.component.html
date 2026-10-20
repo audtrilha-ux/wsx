@@ -1,0 +1,110 @@
+<div class="h-full flex flex-col bg-slate-50 font-sans">
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-xs">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-xs">
+        <mat-icon class="text-[20px]">inventory_2</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-sm font-bold text-slate-900 leading-tight">Controle de Estoque & Suprimentos</h2>
+        <p class="text-[11px] text-slate-500 font-medium">Terminal Operacional · {{ app.companyName }}</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+        [class]="app.isOnline ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'">
+        <span class="w-2 h-2 rounded-full" [class]="app.isOnline ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+        {{ app.isOnline ? 'Sincronizado' : 'Modo Local (Offline)' }}
+      </div>
+
+      <div class="h-4 w-px bg-slate-200"></div>
+
+      <button
+        (click)="reloadItems()"
+        class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+        title="Atualizar Estoque">
+        <mat-icon class="text-[18px]">refresh</mat-icon>
+      </button>
+
+      <button
+        (click)="isCreateOpen.set(true)"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-xs cursor-pointer transition-all">
+        <mat-icon class="text-[16px]">add</mat-icon>
+        Cadastrar Produto
+      </button>
+    </div>
+  </header>
+
+  <!-- Tab Selectors & KPI Row -->
+  <div class="bg-white border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between px-6 shrink-0">
+    <!-- Tabs -->
+    <div class="flex border-b md:border-b-0 border-slate-100" role="tablist" aria-label="Navegação de Estoque">
+      <button
+        role="tab"
+        [aria-selected]="activeTab() === 'STOCK'"
+        (click)="activeTab.set('STOCK')"
+        [class]="activeTab() === 'STOCK' 
+          ? 'border-teal-600 text-teal-600 font-bold' 
+          : 'border-transparent text-slate-500 hover:text-slate-800'"
+        class="px-4 py-4 text-xs font-semibold border-b-2 -mb-px transition-all cursor-pointer">
+        Produtos & Estoque
+      </button>
+      <button
+        role="tab"
+        [aria-selected]="activeTab() === 'LEDGER'"
+        (click)="activeTab.set('LEDGER')"
+        [class]="activeTab() === 'LEDGER' 
+          ? 'border-teal-600 text-teal-600 font-bold' 
+          : 'border-transparent text-slate-500 hover:text-slate-800'"
+        class="px-4 py-4 text-xs font-semibold border-b-2 -mb-px transition-all cursor-pointer flex items-center gap-1.5">
+        <mat-icon class="text-[16px]">receipt_long</mat-icon>
+        Livro-Razão (Movimentações)
+      </button>
+    </div>
+
+    <!-- Mini Stats Summary -->
+    <div class="flex items-center gap-4 py-3 md:py-0 text-[11px] font-medium text-slate-500">
+      <div>
+        Total Itens: <span class="font-bold text-slate-950">{{ items().length }}</span>
+      </div>
+      <div class="h-3 w-px bg-slate-200"></div>
+      <div>
+        Críticos: <span class="font-bold text-rose-600">{{ lowStockCount() }}</span>
+      </div>
+      <div class="h-3 w-px bg-slate-200"></div>
+      <div>
+        Custo Total: <span class="font-bold text-slate-950">{{ totalCostValue() | currency:'BRL' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content Area -->
+  <main class="flex-1 overflow-hidden relative">
+    @if (activeTab() === 'STOCK') {
+      <app-inventory-table
+        [items]="items()"
+        (adjustStockRequested)="selectedItemForAdjustment.set($event)">
+      </app-inventory-table>
+    } @else {
+      <app-inventory-ledger
+        [movements]="movements()"
+        [products]="items()">
+      </app-inventory-ledger>
+    }
+  </main>
+
+  <!-- Stock Adjust Modal Component -->
+  <app-inventory-adjust-modal
+    [item]="selectedItemForAdjustment()"
+    (closed)="selectedItemForAdjustment.set(null)"
+    (adjusted)="handleAdjustStock($event)">
+  </app-inventory-adjust-modal>
+
+  <!-- Product Master Create Modal -->
+  <app-inventory-create-modal
+    [isOpen]="isCreateOpen()"
+    (closed)="isCreateOpen.set(false)"
+    (saved)="handleCreateProduct($event)">
+  </app-inventory-create-modal>
+</div>
